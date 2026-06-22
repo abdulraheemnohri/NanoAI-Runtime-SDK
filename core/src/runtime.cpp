@@ -3,6 +3,8 @@
 #include "backends/onnx_backend.h"
 #include "backends/tflite_backend.h"
 #include "backends/gguf_backend.h"
+#include "acceleration/selector.h"
+#include "memory/optimizer.h"
 #include <iostream>
 #include <memory>
 
@@ -17,6 +19,15 @@ public:
         if (format == ModelFormat::AUTO) {
             format = detectFormat(modelPath);
         }
+
+        // Apply memory optimizations
+        MemoryOptimizer::applyOptimizations(modelPath);
+
+        // Select best device
+        DeviceType device = SmartRuntimeSelector::selectBestDevice();
+        std::cout << "Runtime: Automatically selected device: "
+                  << (device == DeviceType::CPU ? "CPU" : (device == DeviceType::GPU ? "GPU" : "NPU"))
+                  << std::endl;
 
         switch (format) {
             case ModelFormat::ONNX:
