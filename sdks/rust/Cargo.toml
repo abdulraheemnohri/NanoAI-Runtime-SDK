@@ -1,0 +1,12 @@
+[package]
+name = "nanoai"
+version = "1.0.0"
+edition = "2021"
+authors = ["NanoAI Team"]
+description = "Universal offline AI runtime SDK for Rust"
+build = "build.rs"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]

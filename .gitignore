@@ -1,0 +1,11 @@
+build/
+target/
+__pycache__/
+*.so
+*.so.*
+*.dylib
+*.dll
+*.o
+*.a
+bin/
+lib/
