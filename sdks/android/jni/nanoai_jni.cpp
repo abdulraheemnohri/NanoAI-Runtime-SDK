@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string>
+#include <vector>
 #include "nanoai/runtime.h"
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -29,5 +30,20 @@ Java_org_nanoai_NanoRuntime_nativeGenerate(JNIEnv* env, jobject thiz, jlong hand
     const char* input = env->GetStringUTFChars(prompt, nullptr);
     std::string result = runtime->generate(input);
     env->ReleaseStringUTFChars(prompt, input);
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeRunOCR(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
+    auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
+    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
+    jsize len = env->GetArrayLength(buffer);
+
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_OCR;
+    task.visionInput = {std::vector<uint8_t>((uint8_t*)bytes, (uint8_t*)bytes + len), width, height, 3};
+
+    std::string result = runtime->runTask(task);
+    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
     return env->NewStringUTF(result.c_str());
 }

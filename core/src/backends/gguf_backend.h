@@ -18,6 +18,10 @@ public:
         return "[GGUF Backend]: Response to \"" + prompt + "\" using " + m_modelPath;
     }
 
+    std::string runTask(const AiTask& task) override {
+        return "[GGUF Backend]: Task processed using " + m_modelPath;
+    }
+
     std::string getName() const override { return "GGUF"; }
 
 private:

@@ -18,6 +18,13 @@ public:
         return "[TFLite Backend]: Response to \"" + prompt + "\" using " + m_modelPath;
     }
 
+    std::string runTask(const AiTask& task) override {
+        if (task.type == TaskType::AUDIO_WAKE_WORD) {
+            return "[TFLite Backend]: Wake word detected using " + m_modelPath;
+        }
+        return "[TFLite Backend]: Task processed";
+    }
+
     std::string getName() const override { return "TFLite"; }
 
 private:

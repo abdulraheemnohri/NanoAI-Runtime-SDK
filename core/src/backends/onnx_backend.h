@@ -18,6 +18,13 @@ public:
         return "[ONNX Backend]: Response to \"" + prompt + "\" using " + m_modelPath;
     }
 
+    std::string runTask(const AiTask& task) override {
+        if (task.type == TaskType::VISION_OCR) {
+            return "[ONNX Backend]: OCR complete for " + m_modelPath;
+        }
+        return "[ONNX Backend]: Task processed";
+    }
+
     std::string getName() const override { return "ONNX"; }
 
 private:

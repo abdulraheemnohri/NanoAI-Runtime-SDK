@@ -20,10 +20,8 @@ public:
             format = detectFormat(modelPath);
         }
 
-        // Apply memory optimizations
         MemoryOptimizer::applyOptimizations(modelPath);
 
-        // Select best device
         DeviceType device = SmartRuntimeSelector::selectBestDevice();
         std::cout << "Runtime: Automatically selected device: "
                   << (device == DeviceType::CPU ? "CPU" : (device == DeviceType::GPU ? "GPU" : "NPU"))
@@ -58,6 +56,13 @@ public:
         return "Error: No model loaded.";
     }
 
+    std::string runTask(const AiTask& task) {
+        if (m_backend) {
+            return m_backend->runTask(task);
+        }
+        return "Error: No model loaded.";
+    }
+
 private:
     ModelFormat detectFormat(const std::string& path) {
         if (path.find(".gguf") != std::string::npos) return ModelFormat::GGUF;
@@ -78,6 +83,10 @@ bool NanoRuntime::loadModel(const std::string& modelPath, ModelFormat format) {
 
 std::string NanoRuntime::generate(const std::string& prompt) {
     return pimpl->generate(prompt);
+}
+
+std::string NanoRuntime::runTask(const AiTask& task) {
+    return pimpl->runTask(task);
 }
 
 } // namespace nanoai
@@ -102,6 +111,26 @@ const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt) {
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
     static thread_local std::string result;
     result = runtime->generate(prompt);
+    return result.c_str();
+}
+
+const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_OCR;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* samples, int count) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::AUDIO_WAKE_WORD;
+    task.audioInput = {std::vector<float>(samples, samples + count), 16000};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
     return result.c_str();
 }
 
