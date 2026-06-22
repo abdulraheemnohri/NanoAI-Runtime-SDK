@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/test_runtime.dir/src/test_runtime.cpp.o -o test_runtime  -Wl,-rpath,/app/build/core libnanoai.so.1.0.0
