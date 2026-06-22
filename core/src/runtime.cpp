@@ -1,32 +1,51 @@
 #include "nanoai/runtime.h"
+#include "backend.h"
+#include "backends/onnx_backend.h"
+#include "backends/tflite_backend.h"
+#include "backends/gguf_backend.h"
 #include <iostream>
-#include <vector>
+#include <memory>
 
 namespace nanoai {
 
 class NanoRuntime::Impl {
 public:
-    Impl() {}
+    Impl() : m_backend(nullptr) {}
     ~Impl() {}
 
     bool loadModel(const std::string& modelPath, ModelFormat format) {
-        std::cout << "Loading model from: " << modelPath << std::endl;
-
         if (format == ModelFormat::AUTO) {
             format = detectFormat(modelPath);
         }
 
-        m_format = format;
-        m_modelPath = modelPath;
-        return true;
+        switch (format) {
+            case ModelFormat::ONNX:
+                m_backend = std::make_unique<OnnxBackend>();
+                break;
+            case ModelFormat::TFLITE:
+            case ModelFormat::LITERT:
+                m_backend = std::make_unique<TfLiteBackend>();
+                break;
+            case ModelFormat::GGUF:
+                m_backend = std::make_unique<GgufBackend>();
+                break;
+            default:
+                std::cerr << "Unsupported or unknown model format for path: " << modelPath << std::endl;
+                return false;
+        }
+
+        if (m_backend) {
+            return m_backend->load(modelPath);
+        }
+        return false;
     }
 
     std::string generate(const std::string& prompt) {
-        return "NanoAI [Offline Mode]: Responding to \"" + prompt + "\" using model " + m_modelPath;
+        if (m_backend) {
+            return m_backend->generate(prompt);
+        }
+        return "Error: No model loaded.";
     }
-
-    // Keep the last result for C API string persistence
-    std::string last_result;
 
 private:
     ModelFormat detectFormat(const std::string& path) {
@@ -36,8 +55,7 @@ private:
         return ModelFormat::AUTO;
     }
 
-    ModelFormat m_format;
-    std::string m_modelPath;
+    std::unique_ptr<Backend> m_backend;
 };
 
 NanoRuntime::NanoRuntime() : pimpl(std::make_unique<Impl>()) {}
@@ -71,10 +89,6 @@ bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path) {
 
 const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt) {
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
-    // This is a bit unsafe as the string is temporary,
-    // but for our skeleton it's fine if we return a persistent pointer or manage memory.
-    // Let's use a static thread-local buffer or modify Impl to hold the last result.
-    // For now, let's keep it simple and just return a leaked or managed string.
     static thread_local std::string result;
     result = runtime->generate(prompt);
     return result.c_str();

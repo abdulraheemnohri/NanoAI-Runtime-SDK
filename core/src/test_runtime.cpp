@@ -5,15 +5,27 @@
 int main() {
     nanoai::NanoRuntime runtime;
 
-    // Test format detection
+    // Test GGUF format
     bool loaded = runtime.loadModel("test.gguf");
     assert(loaded);
-
-    // Test generation
     std::string result = runtime.generate("Hello");
-    std::cout << "Result: " << result << std::endl;
-    assert(result.find("Responding to \"Hello\"") != std::string::npos);
+    std::cout << "GGUF Result: " << result << std::endl;
+    assert(result.find("[GGUF Backend]") != std::string::npos);
 
-    std::cout << "C++ API Test Passed!" << std::endl;
+    // Test ONNX format
+    loaded = runtime.loadModel("test.onnx");
+    assert(loaded);
+    result = runtime.generate("Hello");
+    std::cout << "ONNX Result: " << result << std::endl;
+    assert(result.find("[ONNX Backend]") != std::string::npos);
+
+    // Test TFLite format
+    loaded = runtime.loadModel("test.tflite");
+    assert(loaded);
+    result = runtime.generate("Hello");
+    std::cout << "TFLite Result: " << result << std::endl;
+    assert(result.find("[TFLite Backend]") != std::string::npos);
+
+    std::cout << "Backend Routing Test Passed!" << std::endl;
     return 0;
 }
