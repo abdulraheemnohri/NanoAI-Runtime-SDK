@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libnanoai.so.1 -o libnanoai.so.1.0.0 CMakeFiles/nanoai.dir/src/runtime.cpp.o
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libnanoai.so.1 -o libnanoai.so.1.0.0 CMakeFiles/nanoai.dir/src/runtime.cpp.o CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o

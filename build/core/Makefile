@@ -189,6 +189,30 @@ test_runtime/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/test_runtime.dir/build.make core/CMakeFiles/test_runtime.dir/build
 .PHONY : test_runtime/fast
 
+__/sdks/android/jni/nanoai_jni.o: __/sdks/android/jni/nanoai_jni.cpp.o
+.PHONY : __/sdks/android/jni/nanoai_jni.o
+
+# target to build an object file
+__/sdks/android/jni/nanoai_jni.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/nanoai.dir/build.make core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o
+.PHONY : __/sdks/android/jni/nanoai_jni.cpp.o
+
+__/sdks/android/jni/nanoai_jni.i: __/sdks/android/jni/nanoai_jni.cpp.i
+.PHONY : __/sdks/android/jni/nanoai_jni.i
+
+# target to preprocess a source file
+__/sdks/android/jni/nanoai_jni.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/nanoai.dir/build.make core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.i
+.PHONY : __/sdks/android/jni/nanoai_jni.cpp.i
+
+__/sdks/android/jni/nanoai_jni.s: __/sdks/android/jni/nanoai_jni.cpp.s
+.PHONY : __/sdks/android/jni/nanoai_jni.s
+
+# target to generate assembly for a file
+__/sdks/android/jni/nanoai_jni.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/nanoai.dir/build.make core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.s
+.PHONY : __/sdks/android/jni/nanoai_jni.cpp.s
+
 src/runtime.o: src/runtime.cpp.o
 .PHONY : src/runtime.o
 
@@ -251,6 +275,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... nanoai"
 	@echo "... test_runtime"
+	@echo "... __/sdks/android/jni/nanoai_jni.o"
+	@echo "... __/sdks/android/jni/nanoai_jni.i"
+	@echo "... __/sdks/android/jni/nanoai_jni.s"
 	@echo "... src/runtime.o"
 	@echo "... src/runtime.i"
 	@echo "... src/runtime.s"

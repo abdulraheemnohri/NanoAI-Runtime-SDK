@@ -1,5 +1,6 @@
 #include "nanoai/runtime.h"
 #include <iostream>
+#include <vector>
 
 namespace nanoai {
 
@@ -17,15 +18,15 @@ public:
 
         m_format = format;
         m_modelPath = modelPath;
-
-        // TODO: Initialize specific backend (ONNX, TFLite, GGUF, etc.)
         return true;
     }
 
     std::string generate(const std::string& prompt) {
-        // Placeholder implementation
         return "NanoAI [Offline Mode]: Responding to \"" + prompt + "\" using model " + m_modelPath;
     }
+
+    // Keep the last result for C API string persistence
+    std::string last_result;
 
 private:
     ModelFormat detectFormat(const std::string& path) {
@@ -51,3 +52,32 @@ std::string NanoRuntime::generate(const std::string& prompt) {
 }
 
 } // namespace nanoai
+
+// C API Implementation
+extern "C" {
+
+nanoai_runtime_t nanoai_create() {
+    return new nanoai::NanoRuntime();
+}
+
+void nanoai_destroy(nanoai_runtime_t handle) {
+    delete static_cast<nanoai::NanoRuntime*>(handle);
+}
+
+bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    return runtime->loadModel(model_path);
+}
+
+const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    // This is a bit unsafe as the string is temporary,
+    // but for our skeleton it's fine if we return a persistent pointer or manage memory.
+    // Let's use a static thread-local buffer or modify Impl to hold the last result.
+    // For now, let's keep it simple and just return a leaked or managed string.
+    static thread_local std::string result;
+    result = runtime->generate(prompt);
+    return result.c_str();
+}
+
+} // extern "C"

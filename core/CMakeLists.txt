@@ -4,8 +4,20 @@ project(nanoai-core VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(nanoai SHARED
+set(NANOAI_SOURCES
     src/runtime.cpp
+)
+
+# Check if JNI is available (for Android/Java SDKs)
+find_package(JNI)
+if (JNI_FOUND)
+    message(STATUS "JNI found, building JNI bridge")
+    include_directories(${JNI_INCLUDE_DIRS})
+    list(APPEND NANOAI_SOURCES ../sdks/android/jni/nanoai_jni.cpp)
+endif()
+
+add_library(nanoai SHARED
+    ${NANOAI_SOURCES}
 )
 
 target_include_directories(nanoai PUBLIC

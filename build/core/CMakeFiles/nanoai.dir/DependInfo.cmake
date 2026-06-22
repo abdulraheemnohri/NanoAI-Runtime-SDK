@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/app/sdks/android/jni/nanoai_jni.cpp" "core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o" "gcc" "core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o.d"
   "/app/core/src/runtime.cpp" "core/CMakeFiles/nanoai.dir/src/runtime.cpp.o" "gcc" "core/CMakeFiles/nanoai.dir/src/runtime.cpp.o.d"
   )
 

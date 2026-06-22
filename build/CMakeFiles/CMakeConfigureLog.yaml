@@ -529,3 +529,42 @@ events:
 
 
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckSourceCompiles.cmake:77 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/FindJNI.cmake:485 (check_source_compiles)"
+      - "core/CMakeLists.txt:12 (find_package)"
+    directories:
+      source: "/app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb"
+      binary: "/app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "JNI_INCLUDE_PATH2_OPTIONAL"
+      cached: true
+      stdout: |
+        Change Dir: '/app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb'
+
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_cdd16/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_cdd16.dir/build.make CMakeFiles/cmTC_cdd16.dir/build
+        gmake[1]: Entering directory '/app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb'
+        Building C object CMakeFiles/cmTC_cdd16.dir/src.c.o
+        /usr/bin/cc -DJNI_INCLUDE_PATH2_OPTIONAL -I/usr/lib/jvm/java-21-openjdk-amd64/include  -o CMakeFiles/cmTC_cdd16.dir/src.c.o -c /app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb/src.c
+        In file included from /app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb/src.c:2:
+        /usr/lib/jvm/java-21-openjdk-amd64/include/jni.h:45:10: fatal error: jni_md.h: No such file or directory
+           45 | #include "jni_md.h"
+              |          ^~~~~~~~~~
+        compilation terminated.
+        gmake[1]: *** [CMakeFiles/cmTC_cdd16.dir/build.make:78: CMakeFiles/cmTC_cdd16.dir/src.c.o] Error 1
+        gmake[1]: Leaving directory '/app/build/CMakeFiles/CMakeScratch/TryCompile-lAXiUb'
+        gmake: *** [Makefile:127: cmTC_cdd16/fast] Error 2
+
+      exitCode: 2
+...

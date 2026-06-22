@@ -4,6 +4,6 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -Dnanoai_EXPORTS
 
-CXX_INCLUDES = -I/app/core/include
+CXX_INCLUDES = -I/usr/lib/jvm/java-21-openjdk-amd64/include -I/usr/lib/jvm/java-21-openjdk-amd64/include/linux -I/app/core/include
 
 CXX_FLAGS = -std=gnu++17 -fPIC
