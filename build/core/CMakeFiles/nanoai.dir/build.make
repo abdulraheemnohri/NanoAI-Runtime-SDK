@@ -83,17 +83,33 @@ core/CMakeFiles/nanoai.dir/src/runtime.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nanoai.dir/src/runtime.cpp.s"
 	cd /app/build/core && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/core/src/runtime.cpp -o CMakeFiles/nanoai.dir/src/runtime.cpp.s
 
+core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o: core/CMakeFiles/nanoai.dir/flags.make
+core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o: /app/sdks/android/jni/nanoai_jni.cpp
+core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o: core/CMakeFiles/nanoai.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o"
+	cd /app/build/core && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o -MF CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o.d -o CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o -c /app/sdks/android/jni/nanoai_jni.cpp
+
+core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.i"
+	cd /app/build/core && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/sdks/android/jni/nanoai_jni.cpp > CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.i
+
+core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.s"
+	cd /app/build/core && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/sdks/android/jni/nanoai_jni.cpp -o CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.s
+
 # Object files for target nanoai
 nanoai_OBJECTS = \
-"CMakeFiles/nanoai.dir/src/runtime.cpp.o"
+"CMakeFiles/nanoai.dir/src/runtime.cpp.o" \
+"CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o"
 
 # External object files for target nanoai
 nanoai_EXTERNAL_OBJECTS =
 
 core/libnanoai.so.1.0.0: core/CMakeFiles/nanoai.dir/src/runtime.cpp.o
+core/libnanoai.so.1.0.0: core/CMakeFiles/nanoai.dir/__/sdks/android/jni/nanoai_jni.cpp.o
 core/libnanoai.so.1.0.0: core/CMakeFiles/nanoai.dir/build.make
 core/libnanoai.so.1.0.0: core/CMakeFiles/nanoai.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libnanoai.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libnanoai.so"
 	cd /app/build/core && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nanoai.dir/link.txt --verbose=$(VERBOSE)
 	cd /app/build/core && $(CMAKE_COMMAND) -E cmake_symlink_library libnanoai.so.1.0.0 libnanoai.so.1 libnanoai.so
 

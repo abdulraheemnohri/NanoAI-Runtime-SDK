@@ -230,6 +230,21 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Java AWT Native Interface include directory
+JAVA_AWT_INCLUDE_PATH:PATH=/usr/lib/jvm/java-21-openjdk-amd64/include
+
+//Java AWT Native Interface library
+JAVA_AWT_LIBRARY:FILEPATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/libjawt.so
+
+//JNI include directory
+JAVA_INCLUDE_PATH:PATH=/usr/lib/jvm/java-21-openjdk-amd64/include
+
+//jni_md.h jniport.h include directory
+JAVA_INCLUDE_PATH2:PATH=/usr/lib/jvm/java-21-openjdk-amd64/include/linux
+
+//Java Virtual Machine library
+JAVA_JVM_LIBRARY:FILEPATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/libjvm.so
+
 //Value Computed by CMake
 nanoai-core_BINARY_DIR:STATIC=/app/build/core
 
@@ -398,5 +413,19 @@ CMAKE_TAPI-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding JNI
+FIND_PACKAGE_MESSAGE_DETAILS_JNI:INTERNAL=[/usr/lib/jvm/java-21-openjdk-amd64/include][/usr/lib/jvm/java-21-openjdk-amd64/include/linux][cfound components: AWT JVM ][v()]
+//ADVANCED property for variable: JAVA_AWT_INCLUDE_PATH
+JAVA_AWT_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_AWT_LIBRARY
+JAVA_AWT_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH
+JAVA_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_INCLUDE_PATH2
+JAVA_INCLUDE_PATH2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: JAVA_JVM_LIBRARY
+JAVA_JVM_LIBRARY-ADVANCED:INTERNAL=1
+//Test JNI_INCLUDE_PATH2_OPTIONAL
+JNI_INCLUDE_PATH2_OPTIONAL:INTERNAL=
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
