@@ -1,85 +1,32 @@
 # NanoAI Runtime SDK
 
-## Vision
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 Ek universal offline AI runtime jo Android, Windows, Linux, macOS aur embedded devices par AI models run kar sake bina cloud dependency ke.
 
-## Core Features
+## 🚀 Vision
+NanoAI ka lakshya hai AI ko har device par offline aur private banana. Hamara runtime high-performance, memory-optimized, aur hardware-accelerated hai.
 
-### Model Support
-- **ONNX Runtime**
-- **TensorFlow Lite**
-- **LiteRT**
-- **GGUF** (Gemma, Llama, Qwen, Phi)
-- **OpenVINO**
-- **PyTorch Export Models**
+## 📄 Documentation
+For complete integration guides and usage examples, see [**DOCUMENTATION.md**](DOCUMENTATION.md).
 
-### Hardware Acceleration
-- **CPU**: x86_64, ARM64, ARMv7
-- **GPU**: Vulkan, OpenCL, CUDA, DirectML, Metal
-- **NPU**: Qualcomm Hexagon, MediaTek APU, Samsung NPU, Google TPU
+## ✨ Key Benefits
+- **Offline-First**: Bina internet ke AI models run karein.
+- **Privacy-Focused**: User data hamesha device par rehta hai.
+- **Hardware Acceleration**: GPU aur NPU ka full power use karein.
+- **Memory Optimized**: Low-RAM devices ke liye special optimizations.
 
-## AI Tasks
+## 🛠 Core Features
+- **Model Support**: ONNX, TFLite, GGUF, OpenVINO, PyTorch.
+- **Hardware**: CPU, GPU (Vulkan, CUDA, Metal), NPU (Hexagon, APU, TPU).
+- **AI Tasks**: Chat, OCR, Wake Word, Translation.
 
-### Text
-- Chat
-- Summarization
-- Translation
-- Classification
-
-### Vision
-- OCR
-- Object Detection
-- Segmentation
-- Face Analysis
-
-### Audio
-- Speech Recognition
-- Voice Commands
-- Wake Words
-
-### Multimodal
-- Image + Text
-- Document Analysis
-- Report Understanding
-
-## SDK Packages
-
-### Android SDK
-```gradle
-implementation "org.nanoai:nanoai-android:1.0.0"
-```
-
-### Java SDK
-```gradle
-implementation "org.nanoai:nanoai-java:1.0.0"
-```
-
-### Python SDK
-```bash
-pip install nanoai
-```
-
-### Rust SDK
-```toml
-nanoai = "1.0"
-```
-
-### C++ SDK
-```cpp
-#include <nanoai/runtime.h>
-```
-
-## Android Example
+## 📦 Quick Start (Android/Kotlin)
 ```kotlin
 val runtime = NanoRuntime()
-
-runtime.loadModel(
-    "gemma-3n.gguf"
-)
-
-val result = runtime.generate(
-    "Explain AI"
-)
-
-println(result)
+runtime.loadModel("gemma.gguf")
+println(runtime.generate("Explain NanoAI"))
 ```
+
+## 💰 Monetization
+NanoAI follows an open-core model. Free for community, paid for commercial usage. See [MONETIZATION.md](MONETIZATION.md) for details.
