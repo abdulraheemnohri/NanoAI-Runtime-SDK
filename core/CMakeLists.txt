@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(NANOAI_SOURCES
     src/runtime.cpp
     src/acceleration/selector.cpp
+    src/conversion/converter.cpp
 )
 
 # Check if JNI is available (for Android/Java SDKs)

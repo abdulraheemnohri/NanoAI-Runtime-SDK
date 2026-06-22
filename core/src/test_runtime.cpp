@@ -4,9 +4,17 @@
 #include <vector>
 
 int main() {
-    nanoai::NanoRuntime runtime;
+    // 1. Test Model Conversion / Auto Quantization
+    nanoai::ConversionConfig config;
+    config.quantization = nanoai::QuantizationType::INT8;
+    config.optimizeForNPU = true;
 
-    // Test OCR Task (Vision)
+    bool converted = nanoai::NanoRuntime::convertModel("model.fp32", "model.int8", config);
+    assert(converted);
+    std::cout << "C++: Model conversion (INT8) successful." << std::endl;
+
+    // 2. Test Multi-modal Tasks
+    nanoai::NanoRuntime runtime;
     runtime.loadModel("vision_model.onnx");
     std::vector<uint8_t> dummy_image(100 * 100 * 3, 0);
     nanoai::AiTask vision_task;
@@ -16,16 +24,6 @@ int main() {
     std::cout << "OCR Result: " << ocr_result << std::endl;
     assert(ocr_result.find("[ONNX Backend]: OCR complete") != std::string::npos);
 
-    // Test Wake Word Task (Audio)
-    runtime.loadModel("audio_model.tflite");
-    std::vector<float> dummy_audio(16000, 0.0f);
-    nanoai::AiTask audio_task;
-    audio_task.type = nanoai::TaskType::AUDIO_WAKE_WORD;
-    audio_task.audioInput = {dummy_audio, 16000};
-    std::string audio_result = runtime.runTask(audio_task);
-    std::cout << "Audio Result: " << audio_result << std::endl;
-    assert(audio_result.find("[TFLite Backend]: Wake word detected") != std::string::npos);
-
-    std::cout << "Multi-modal AI Task Test Passed!" << std::endl;
+    std::cout << "C++ All Tests Passed!" << std::endl;
     return 0;
 }

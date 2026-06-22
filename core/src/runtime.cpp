@@ -5,6 +5,7 @@
 #include "backends/gguf_backend.h"
 #include "acceleration/selector.h"
 #include "memory/optimizer.h"
+#include "conversion/converter.h"
 #include <iostream>
 #include <memory>
 
@@ -89,6 +90,12 @@ std::string NanoRuntime::runTask(const AiTask& task) {
     return pimpl->runTask(task);
 }
 
+bool NanoRuntime::convertModel(const std::string& inputPath,
+                              const std::string& outputPath,
+                              const ConversionConfig& config) {
+    return ModelConverter::convert(inputPath, outputPath, config);
+}
+
 } // namespace nanoai
 
 // C API Implementation
@@ -132,6 +139,14 @@ const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* sample
     static thread_local std::string result;
     result = runtime->runTask(task);
     return result.c_str();
+}
+
+bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type) {
+    nanoai::ConversionConfig config;
+    config.quantization = static_cast<nanoai::QuantizationType>(quantization_type);
+    config.optimizeForNPU = true;
+    config.enablePruning = false;
+    return nanoai::NanoRuntime::convertModel(input_path, output_path, config);
 }
 
 } // extern "C"
