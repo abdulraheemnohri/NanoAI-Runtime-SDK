@@ -3,6 +3,8 @@
 #include "backends/onnx_backend.h"
 #include "backends/tflite_backend.h"
 #include "backends/gguf_backend.h"
+#include "backends/openvino_backend.h"
+#include "backends/pytorch_backend.h"
 #include "acceleration/selector.h"
 #include "memory/optimizer.h"
 #include "conversion/converter.h"
@@ -24,9 +26,6 @@ public:
         MemoryOptimizer::applyOptimizations(modelPath);
 
         DeviceType device = SmartRuntimeSelector::selectBestDevice();
-        std::cout << "Runtime: Automatically selected device: "
-                  << (device == DeviceType::CPU ? "CPU" : (device == DeviceType::GPU ? "GPU" : "NPU"))
-                  << std::endl;
 
         switch (format) {
             case ModelFormat::ONNX:
@@ -38,6 +37,12 @@ public:
                 break;
             case ModelFormat::GGUF:
                 m_backend = std::make_unique<GgufBackend>();
+                break;
+            case ModelFormat::OPENVINO:
+                m_backend = std::make_unique<OpenVinoBackend>();
+                break;
+            case ModelFormat::PYTORCH:
+                m_backend = std::make_unique<PyTorchBackend>();
                 break;
             default:
                 std::cerr << "Unsupported or unknown model format for path: " << modelPath << std::endl;
@@ -69,6 +74,8 @@ private:
         if (path.find(".gguf") != std::string::npos) return ModelFormat::GGUF;
         if (path.find(".onnx") != std::string::npos) return ModelFormat::ONNX;
         if (path.find(".tflite") != std::string::npos) return ModelFormat::TFLITE;
+        if (path.find(".xml") != std::string::npos || path.find(".bin") != std::string::npos) return ModelFormat::OPENVINO;
+        if (path.find(".pt") != std::string::npos || path.find(".pth") != std::string::npos) return ModelFormat::PYTORCH;
         return ModelFormat::AUTO;
     }
 

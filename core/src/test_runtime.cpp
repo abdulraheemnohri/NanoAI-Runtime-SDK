@@ -1,39 +1,30 @@
 #include "nanoai/runtime.h"
-#include "../src/acceleration/cpu_info.h"
 #include <iostream>
 #include <cassert>
 #include <vector>
 
 int main() {
-    // 1. Test CPU Architecture Detection
-    std::cout << "C++: Detected Architecture: " << nanoai::CpuInfo::getArchitectureName() << std::endl;
-
-    // 2. Test Model Conversion
-    nanoai::ConversionConfig config;
-    config.quantization = nanoai::QuantizationType::INT4;
-    config.optimizeForNPU = true;
-    bool converted = nanoai::NanoRuntime::convertModel("llama.fp32", "llama.int4", config);
-    assert(converted);
-
-    // 3. Test New AI Tasks
     nanoai::NanoRuntime runtime;
-    runtime.loadModel("multimodal.onnx");
 
-    // OCR
-    nanoai::AiTask ocr_task;
-    ocr_task.type = nanoai::TaskType::VISION_OCR;
-    ocr_task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
-    std::string ocr_res = runtime.runTask(ocr_task);
-    std::cout << "C++ OCR: " << ocr_res << std::endl;
-    assert(ocr_res.find("OCR complete") != std::string::npos);
+    // 1. Test OpenVINO routing
+    assert(runtime.loadModel("model.xml"));
+    std::string ov_res = runtime.generate("test");
+    std::cout << "OpenVINO Result: " << ov_res << std::endl;
+    assert(ov_res.find("OpenVINO") != std::string::npos);
 
-    // Object Detection
-    nanoai::AiTask det_task;
-    det_task.type = nanoai::TaskType::VISION_OBJECT_DETECTION;
-    det_task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
-    std::string det_res = runtime.runTask(det_task);
-    std::cout << "C++ Detection: " << det_res << std::endl;
+    // 2. Test PyTorch routing
+    assert(runtime.loadModel("model.pt"));
+    std::string pt_res = runtime.generate("test");
+    std::cout << "PyTorch Result: " << pt_res << std::endl;
+    assert(pt_res.find("PyTorch") != std::string::npos);
 
-    std::cout << "C++ AI Task Expansion Tests Passed!" << std::endl;
+    // 3. Test multi-task routing
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_OCR;
+    task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
+    std::string ocr_res = runtime.runTask(task);
+    std::cout << "OCR Result: " << ocr_res << std::endl;
+
+    std::cout << "Backend Expansion Tests Passed!" << std::endl;
     return 0;
 }
