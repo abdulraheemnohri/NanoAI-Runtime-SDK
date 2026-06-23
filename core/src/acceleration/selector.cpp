@@ -17,13 +17,13 @@ std::vector<DeviceCapability> SmartRuntimeSelector::getAvailableDevices() {
     devices.push_back({DeviceType::CPU, "Local CPU (x86_64/ARM)", 1.0f, true});
 
     // GPU Detection
-    devices.push_back({DeviceType::GPU, "NVIDIA GPU (CUDA)", 7.0f, true}); // Score based on CUDA availability
+    devices.push_back({DeviceType::GPU, "NVIDIA GPU (CUDA)", 7.0f, true});
     devices.push_back({DeviceType::GPU, "Integrated GPU (Vulkan/Metal)", 5.0f, true});
 
-    // NPU Detection: Qualcomm Hexagon, MediaTek APU, Samsung NPU, Google TPU
+    // Specialized NPU Detection (Hardware Acceleration section)
     devices.push_back({DeviceType::NPU, "Qualcomm Hexagon NPU", 10.0f, true});
-    devices.push_back({DeviceType::NPU, "MediaTek APU", 10.0f, false});
-    devices.push_back({DeviceType::NPU, "Samsung NPU", 10.0f, false});
+    devices.push_back({DeviceType::NPU, "MediaTek APU", 10.0f, true});
+    devices.push_back({DeviceType::NPU, "Samsung NPU", 10.0f, true});
     devices.push_back({DeviceType::NPU, "Google TPU", 12.0f, false});
 
     // Distributed nodes

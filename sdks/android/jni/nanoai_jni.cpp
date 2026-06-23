@@ -37,12 +37,13 @@ Java_org_nanoai_NanoRuntime_nativeGenerate(JNIEnv* env, jobject thiz, jlong hand
     return env->NewStringUTF(result.c_str());
 }
 
-extern "C" JNIEXPORT jboolean JNICALL
-Java_org_nanoai_NanoRuntime_nativeJoinCluster(JNIEnv* env, jobject thiz, jstring cluster_id) {
-    const char* id = env->GetStringUTFChars(cluster_id, nullptr);
-    bool success = nanoai_join_cluster(id);
-    env->ReleaseStringUTFChars(cluster_id, id);
-    return static_cast<jboolean>(success);
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeGetDetectedHardware(JNIEnv* env, jobject thiz, jlong handle, jstring model_id) {
+    auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
+    const char* id = env->GetStringUTFChars(model_id, nullptr);
+    std::string info = runtime->getDetectedHardware(id);
+    env->ReleaseStringUTFChars(model_id, id);
+    return env->NewStringUTF(info.c_str());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
