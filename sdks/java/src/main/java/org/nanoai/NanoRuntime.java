@@ -54,16 +54,32 @@ public class NanoRuntime {
         return nativeRunSegmentation(nativeHandle, buffer, width, height);
     }
 
-    public String summarizeText(String text) {
-        return nativeSummarizeText(nativeHandle, text);
-    }
-
     public String detectObjects(byte[] buffer, int width, int height) {
         return nativeDetectObjects(nativeHandle, buffer, width, height);
     }
 
+    public String analyzeFace(byte[] buffer, int width, int height) {
+        return nativeAnalyzeFace(nativeHandle, buffer, width, height);
+    }
+
     public String recognizeSpeech(float[] samples) {
         return nativeRecognizeSpeech(nativeHandle, samples);
+    }
+
+    public String detectWakeWord(float[] samples) {
+        return nativeDetectWakeWord(nativeHandle, samples);
+    }
+
+    public String summarizeText(String text) {
+        return nativeSummarizeText(nativeHandle, text);
+    }
+
+    public String translateText(String text) {
+        return nativeTranslateText(nativeHandle, text);
+    }
+
+    public String classifyText(String text) {
+        return nativeClassifyText(nativeHandle, text);
     }
 
     public static boolean convertModel(String inputPath, String outputPath, int quantizationType) {
@@ -77,8 +93,12 @@ public class NanoRuntime {
     private native String nativeGenerate(long handle, String prompt);
     private native String nativeRunOCR(long handle, byte[] buffer, int width, int height);
     private native String nativeRunSegmentation(long handle, byte[] buffer, int width, int height);
-    private native String nativeSummarizeText(long handle, String text);
     private native String nativeDetectObjects(long handle, byte[] buffer, int width, int height);
+    private native String nativeAnalyzeFace(long handle, byte[] buffer, int width, int height);
     private native String nativeRecognizeSpeech(long handle, float[] samples);
+    private native String nativeDetectWakeWord(long handle, float[] samples);
+    private native String nativeSummarizeText(long handle, String text);
+    private native String nativeTranslateText(long handle, String text);
+    private native String nativeClassifyText(long handle, String text);
     private static native boolean nativeConvertModel(String inputPath, String outputPath, int quantizationType);
 }
