@@ -38,9 +38,11 @@ class NanoRuntime:
         self.lib.nanoai_generate_id.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
         self.lib.nanoai_generate_id.restype = ctypes.c_char_p
 
-        if hasattr(self.lib, 'nanoai_join_cluster'):
-            self.lib.nanoai_join_cluster.argtypes = [ctypes.c_char_p]
-            self.lib.nanoai_join_cluster.restype = ctypes.c_bool
+        for func in ['nanoai_run_ocr', 'nanoai_run_segmentation', 'nanoai_detect_objects', 'nanoai_analyze_face', 'nanoai_analyze_document', 'nanoai_understand_report']:
+            if hasattr(self.lib, func):
+                f = getattr(self.lib, func)
+                f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
+                f.restype = ctypes.c_char_p
 
     def __del__(self):
         if hasattr(self, 'handle') and self.handle:
@@ -52,8 +54,12 @@ class NanoRuntime:
     def generate(self, prompt: str, model_id: str = "default") -> str:
         return self.lib.nanoai_generate_id(self.handle, prompt.encode('utf-8'), model_id.encode('utf-8')).decode('utf-8')
 
-    def join_cluster(self, cluster_id: str) -> bool:
-        return self.lib.nanoai_join_cluster(cluster_id.encode('utf-8'))
+    def run_ocr(self, buffer, width, height) -> str:
+        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
+        return self.lib.nanoai_run_ocr(self.handle, data_ptr, width, height).decode('utf-8')
+
+    def summarize_text(self, text: str) -> str:
+        return self.lib.nanoai_summarize_text(self.handle, text.encode('utf-8')).decode('utf-8')
 
     @staticmethod
     def convert_model(input_path: str, output_path: str, quantization_type: int) -> bool:
