@@ -31,49 +31,26 @@ class NanoRuntime:
     def _setup_bindings(self):
         self.lib.nanoai_create.restype = ctypes.c_void_p
         self.lib.nanoai_destroy.argtypes = [ctypes.c_void_p]
-        self.lib.nanoai_load_model.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        self.lib.nanoai_load_model.restype = ctypes.c_bool
-        self.lib.nanoai_generate.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        self.lib.nanoai_generate.restype = ctypes.c_char_p
 
-        for func in ['nanoai_run_ocr', 'nanoai_run_segmentation', 'nanoai_detect_objects', 'nanoai_analyze_face']:
-            f = getattr(self.lib, func)
-            f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
-            f.restype = ctypes.c_char_p
+        self.lib.nanoai_load_model_id.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.nanoai_load_model_id.restype = ctypes.c_bool
 
-        for func in ['nanoai_recognize_speech', 'nanoai_detect_wake_word']:
-            f = getattr(self.lib, func)
-            f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int]
-            f.restype = ctypes.c_char_p
+        self.lib.nanoai_generate_id.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.nanoai_generate_id.restype = ctypes.c_char_p
 
-        for func in ['nanoai_summarize_text', 'nanoai_translate_text', 'nanoai_classify_text']:
-            f = getattr(self.lib, func)
-            f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-            f.restype = ctypes.c_char_p
+        self.lib.nanoai_run_ocr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
+        self.lib.nanoai_run_ocr.restype = ctypes.c_char_p
 
     def __del__(self):
         if hasattr(self, 'handle') and self.handle:
             self.lib.nanoai_destroy(self.handle)
 
-    def load_model(self, model_path: str) -> bool:
-        return self.lib.nanoai_load_model(self.handle, model_path.encode('utf-8'))
+    def load_model(self, model_path: str, model_id: str = "default") -> bool:
+        return self.lib.nanoai_load_model_id(self.handle, model_path.encode('utf-8'), model_id.encode('utf-8'))
 
-    def generate(self, prompt: str) -> str:
-        result = self.lib.nanoai_generate(self.handle, prompt.encode('utf-8'))
+    def generate(self, prompt: str, model_id: str = "default") -> str:
+        result = self.lib.nanoai_generate_id(self.handle, prompt.encode('utf-8'), model_id.encode('utf-8'))
         return result.decode('utf-8')
-
-    def run_ocr(self, buffer, width, height) -> str:
-        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
-        return self.lib.nanoai_run_ocr(self.handle, data_ptr, width, height).decode('utf-8')
-
-    def summarize_text(self, text: str) -> str:
-        return self.lib.nanoai_summarize_text(self.handle, text.encode('utf-8')).decode('utf-8')
-
-    def translate_text(self, text: str) -> str:
-        return self.lib.nanoai_translate_text(self.handle, text.encode('utf-8')).decode('utf-8')
-
-    def classify_text(self, text: str) -> str:
-        return self.lib.nanoai_classify_text(self.handle, text.encode('utf-8')).decode('utf-8')
 
     @staticmethod
     def convert_model(input_path: str, output_path: str, quantization_type: int) -> bool:

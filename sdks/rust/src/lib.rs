@@ -6,17 +6,9 @@ type NanoaiRuntimeT = *mut c_void;
 extern "C" {
     fn nanoai_create() -> NanoaiRuntimeT;
     fn nanoai_destroy(handle: NanoaiRuntimeT);
-    fn nanoai_load_model(handle: NanoaiRuntimeT, model_path: *const c_char) -> bool;
-    fn nanoai_generate(handle: NanoaiRuntimeT, prompt: *const c_char) -> *const c_char;
+    fn nanoai_load_model_id(handle: NanoaiRuntimeT, model_path: *const c_char, model_id: *const c_char) -> bool;
+    fn nanoai_generate_id(handle: NanoaiRuntimeT, prompt: *const c_char, model_id: *const c_char) -> *const c_char;
     fn nanoai_run_ocr(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
-    fn nanoai_run_segmentation(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
-    fn nanoai_detect_objects(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
-    fn nanoai_analyze_face(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
-    fn nanoai_recognize_speech(handle: NanoaiRuntimeT, samples: *const f32, count: c_int) -> *const c_char;
-    fn nanoai_detect_wake_word(handle: NanoaiRuntimeT, samples: *const f32, count: c_int) -> *const c_char;
-    fn nanoai_summarize_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
-    fn nanoai_translate_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
-    fn nanoai_classify_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
     fn nanoai_convert_model(input_path: *const c_char, output_path: *const c_char, quant: c_int) -> bool;
 }
 
@@ -29,33 +21,17 @@ impl NanoRuntime {
         unsafe { Self { handle: nanoai_create() } }
     }
 
-    pub fn load_model(&self, model_path: &str) -> bool {
+    pub fn load_model(&self, model_path: &str, model_id: &str) -> bool {
         let c_path = CString::new(model_path).unwrap();
-        unsafe { nanoai_load_model(self.handle, c_path.as_ptr()) }
+        let c_id = CString::new(model_id).unwrap();
+        unsafe { nanoai_load_model_id(self.handle, c_path.as_ptr(), c_id.as_ptr()) }
     }
 
-    pub fn generate(&self, prompt: &str) -> String {
+    pub fn generate(&self, prompt: &str, model_id: &str) -> String {
         let c_prompt = CString::new(prompt).unwrap();
+        let c_id = CString::new(model_id).unwrap();
         unsafe {
-            let result_ptr = nanoai_generate(self.handle, c_prompt.as_ptr());
-            if result_ptr.is_null() { return String::new(); }
-            CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
-        }
-    }
-
-    pub fn translate_text(&self, text: &str) -> String {
-        let c_text = CString::new(text).unwrap();
-        unsafe {
-            let result_ptr = nanoai_translate_text(self.handle, c_text.as_ptr());
-            if result_ptr.is_null() { return String::new(); }
-            CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
-        }
-    }
-
-    pub fn classify_text(&self, text: &str) -> String {
-        let c_text = CString::new(text).unwrap();
-        unsafe {
-            let result_ptr = nanoai_classify_text(self.handle, c_text.as_ptr());
+            let result_ptr = nanoai_generate_id(self.handle, c_prompt.as_ptr(), c_id.as_ptr());
             if result_ptr.is_null() { return String::new(); }
             CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
         }

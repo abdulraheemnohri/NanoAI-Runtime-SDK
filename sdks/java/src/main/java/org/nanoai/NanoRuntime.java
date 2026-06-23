@@ -37,49 +37,21 @@ public class NanoRuntime {
     }
 
     public boolean loadModel(String modelPath) {
+        return loadModel(modelPath, "default");
+    }
+
+    public boolean loadModel(String modelPath, String modelId) {
         if (nativeHandle == 0) return false;
-        return nativeLoadModel(nativeHandle, modelPath);
+        return nativeLoadModel(nativeHandle, modelPath, modelId);
     }
 
     public String generate(String prompt) {
+        return generate(prompt, "default");
+    }
+
+    public String generate(String prompt, String modelId) {
         if (nativeHandle == 0) return "Runtime not initialized";
-        return nativeGenerate(nativeHandle, prompt);
-    }
-
-    public String runOCR(byte[] buffer, int width, int height) {
-        return nativeRunOCR(nativeHandle, buffer, width, height);
-    }
-
-    public String runSegmentation(byte[] buffer, int width, int height) {
-        return nativeRunSegmentation(nativeHandle, buffer, width, height);
-    }
-
-    public String detectObjects(byte[] buffer, int width, int height) {
-        return nativeDetectObjects(nativeHandle, buffer, width, height);
-    }
-
-    public String analyzeFace(byte[] buffer, int width, int height) {
-        return nativeAnalyzeFace(nativeHandle, buffer, width, height);
-    }
-
-    public String recognizeSpeech(float[] samples) {
-        return nativeRecognizeSpeech(nativeHandle, samples);
-    }
-
-    public String detectWakeWord(float[] samples) {
-        return nativeDetectWakeWord(nativeHandle, samples);
-    }
-
-    public String summarizeText(String text) {
-        return nativeSummarizeText(nativeHandle, text);
-    }
-
-    public String translateText(String text) {
-        return nativeTranslateText(nativeHandle, text);
-    }
-
-    public String classifyText(String text) {
-        return nativeClassifyText(nativeHandle, text);
+        return nativeGenerate(nativeHandle, prompt, modelId);
     }
 
     public static boolean convertModel(String inputPath, String outputPath, int quantizationType) {
@@ -89,8 +61,8 @@ public class NanoRuntime {
     // Native methods
     private native long nativeInit();
     private native void nativeDestroy(long handle);
-    private native boolean nativeLoadModel(long handle, String modelPath);
-    private native String nativeGenerate(long handle, String prompt);
+    private native boolean nativeLoadModel(long handle, String modelPath, String modelId);
+    private native String nativeGenerate(long handle, String prompt, String modelId);
     private native String nativeRunOCR(long handle, byte[] buffer, int width, int height);
     private native String nativeRunSegmentation(long handle, byte[] buffer, int width, int height);
     private native String nativeDetectObjects(long handle, byte[] buffer, int width, int height);
