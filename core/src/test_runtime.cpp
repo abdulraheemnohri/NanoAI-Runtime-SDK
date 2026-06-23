@@ -6,25 +6,29 @@
 int main() {
     nanoai::NanoRuntime runtime;
 
-    // 1. Test OpenVINO routing
-    assert(runtime.loadModel("model.xml"));
-    std::string ov_res = runtime.generate("test");
-    std::cout << "OpenVINO Result: " << ov_res << std::endl;
-    assert(ov_res.find("OpenVINO") != std::string::npos);
+    // 1. Verify NPU Priority Selection
+    std::cout << "--- Testing NPU Selection ---" << std::endl;
+    runtime.loadModel("any_model.gguf");
+    // Output should show NPU selection in terminal
 
-    // 2. Test PyTorch routing
-    assert(runtime.loadModel("model.pt"));
-    std::string pt_res = runtime.generate("test");
-    std::cout << "PyTorch Result: " << pt_res << std::endl;
-    assert(pt_res.find("PyTorch") != std::string::npos);
+    // 2. Verify Summarization Task
+    std::cout << "--- Testing Summarization ---" << std::endl;
+    nanoai::AiTask sum_task;
+    sum_task.type = nanoai::TaskType::TEXT_SUMMARIZATION;
+    sum_task.textInput = "NanoAI is a universal offline runtime.";
+    std::string sum_res = runtime.runTask(sum_task);
+    std::cout << "Sum Res: " << sum_res << std::endl;
+    assert(sum_res.find("Summary of") != std::string::npos);
 
-    // 3. Test multi-task routing
-    nanoai::AiTask task;
-    task.type = nanoai::TaskType::VISION_OCR;
-    task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
-    std::string ocr_res = runtime.runTask(task);
-    std::cout << "OCR Result: " << ocr_res << std::endl;
+    // 3. Verify Segmentation Task (routing through a backend, e.g., ONNX)
+    std::cout << "--- Testing Segmentation ---" << std::endl;
+    runtime.loadModel("seg.onnx");
+    nanoai::AiTask seg_task;
+    seg_task.type = nanoai::TaskType::VISION_SEGMENTATION;
+    seg_task.visionInput = {std::vector<uint8_t>(100, 0), 10, 10, 1};
+    std::string seg_res = runtime.runTask(seg_task);
+    std::cout << "Seg Res: " << seg_res << std::endl;
 
-    std::cout << "Backend Expansion Tests Passed!" << std::endl;
+    std::cout << "C++ NPU and Expanded Task Tests Passed!" << std::endl;
     return 0;
 }

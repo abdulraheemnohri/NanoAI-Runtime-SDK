@@ -35,6 +35,12 @@ class NanoRuntime:
         self.lib.nanoai_run_ocr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
         self.lib.nanoai_run_ocr.restype = ctypes.c_char_p
 
+        self.lib.nanoai_run_segmentation.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
+        self.lib.nanoai_run_segmentation.restype = ctypes.c_char_p
+
+        self.lib.nanoai_summarize_text.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        self.lib.nanoai_summarize_text.restype = ctypes.c_char_p
+
         self.lib.nanoai_detect_objects.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
         self.lib.nanoai_detect_objects.restype = ctypes.c_char_p
 
@@ -59,6 +65,15 @@ class NanoRuntime:
         result = self.lib.nanoai_run_ocr(self.handle, data_ptr, width, height)
         return result.decode('utf-8')
 
+    def run_segmentation(self, buffer, width, height) -> str:
+        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
+        result = self.lib.nanoai_run_segmentation(self.handle, data_ptr, width, height)
+        return result.decode('utf-8')
+
+    def summarize_text(self, text: str) -> str:
+        result = self.lib.nanoai_summarize_text(self.handle, text.encode('utf-8'))
+        return result.decode('utf-8')
+
     def detect_objects(self, buffer, width, height) -> str:
         data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
         result = self.lib.nanoai_detect_objects(self.handle, data_ptr, width, height)
@@ -71,8 +86,6 @@ class NanoRuntime:
 
     @staticmethod
     def convert_model(input_path: str, output_path: str, quantization_type: int) -> bool:
-        # Static methods need a fresh CDLL load or internal shared reference
-        # For simplicity, we assume the library is already in path
         lib = ctypes.CDLL("libnanoai.so")
         lib.nanoai_convert_model.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
         lib.nanoai_convert_model.restype = ctypes.c_bool

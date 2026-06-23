@@ -177,3 +177,27 @@ bool nanoai_convert_model(const char* input_path, const char* output_path, int q
 }
 
 } // extern "C"
+
+extern "C" {
+
+const char* nanoai_run_segmentation(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_SEGMENTATION;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_summarize_text(nanoai_runtime_t handle, const char* text) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::TEXT_SUMMARIZATION;
+    task.textInput = text;
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+} // extern "C"

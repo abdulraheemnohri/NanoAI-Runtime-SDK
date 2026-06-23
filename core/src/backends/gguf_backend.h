@@ -19,6 +19,9 @@ public:
     }
 
     std::string runTask(const AiTask& task) override {
+        if (task.type == TaskType::TEXT_SUMMARIZATION) {
+            return "[GGUF Backend]: Summary of \"" + task.textInput + "\" using " + m_modelPath;
+        }
         return "[GGUF Backend]: Task processed using " + m_modelPath;
     }
 
