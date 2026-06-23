@@ -47,3 +47,15 @@ Java_org_nanoai_NanoRuntime_nativeRunOCR(JNIEnv* env, jobject thiz, jlong handle
     env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
     return env->NewStringUTF(result.c_str());
 }
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_nanoai_NanoRuntime_nativeConvertModel(JNIEnv* env, jclass clazz, jstring input_path, jstring output_path, jint quantization_type) {
+    const char* in = env->GetStringUTFChars(input_path, nullptr);
+    const char* out = env->GetStringUTFChars(output_path, nullptr);
+
+    bool success = nanoai_convert_model(in, out, quantization_type);
+
+    env->ReleaseStringUTFChars(input_path, in);
+    env->ReleaseStringUTFChars(output_path, out);
+    return static_cast<jboolean>(success);
+}
