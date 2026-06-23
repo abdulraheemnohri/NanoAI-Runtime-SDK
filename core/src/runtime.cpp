@@ -8,6 +8,7 @@
 #include "acceleration/selector.h"
 #include "memory/optimizer.h"
 #include "conversion/converter.h"
+#include "networking/network_manager.h"
 #include <iostream>
 #include <memory>
 #include <unordered_map>
@@ -33,22 +34,12 @@ public:
 
         std::unique_ptr<Backend> backend;
         switch (format) {
-            case ModelFormat::ONNX:
-                backend = std::make_unique<OnnxBackend>();
-                break;
+            case ModelFormat::ONNX: backend = std::make_unique<OnnxBackend>(); break;
             case ModelFormat::TFLITE:
-            case ModelFormat::LITERT:
-                backend = std::make_unique<TfLiteBackend>();
-                break;
-            case ModelFormat::GGUF:
-                backend = std::make_unique<GgufBackend>();
-                break;
-            case ModelFormat::OPENVINO:
-                backend = std::make_unique<OpenVinoBackend>();
-                break;
-            case ModelFormat::PYTORCH:
-                backend = std::make_unique<PyTorchBackend>();
-                break;
+            case ModelFormat::LITERT: backend = std::make_unique<TfLiteBackend>(); break;
+            case ModelFormat::GGUF: backend = std::make_unique<GgufBackend>(); break;
+            case ModelFormat::OPENVINO: backend = std::make_unique<OpenVinoBackend>(); break;
+            case ModelFormat::PYTORCH: backend = std::make_unique<PyTorchBackend>(); break;
             default:
                 std::cerr << "Unsupported format for " << modelId << std::endl;
                 return false;
@@ -73,6 +64,14 @@ public:
     }
 
     std::string runTask(const AiTask& task, const std::string& modelId) {
+        // Roadmap v4: Distributed Inference logic
+        auto peers = NetworkManager::discoverPeers();
+        if (!peers.empty()) {
+            std::cout << "Runtime: Detected " << peers.size() << " peers. Splitting task for distributed inference." << std::endl;
+            WorkloadChunk chunk = {"task-123", 0, 2, {}};
+            NetworkManager::offloadWorkload(chunk, peers[0].id);
+        }
+
         auto it = m_backends.find(modelId);
         if (it != m_backends.end()) {
             return it->second->runTask(task);
@@ -286,6 +285,10 @@ bool nanoai_convert_model(const char* input_path, const char* output_path, int q
     config.optimizeForNPU = true;
     config.enablePruning = false;
     return nanoai::NanoRuntime::convertModel(input_path, output_path, config);
+}
+
+bool nanoai_join_cluster(const char* cluster_id) {
+    return nanoai::NetworkManager::initializeCluster(cluster_id);
 }
 
 } // extern "C"

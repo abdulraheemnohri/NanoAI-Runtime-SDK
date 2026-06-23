@@ -8,8 +8,7 @@ extern "C" {
     fn nanoai_destroy(handle: NanoaiRuntimeT);
     fn nanoai_load_model_id(handle: NanoaiRuntimeT, model_path: *const c_char, model_id: *const c_char) -> bool;
     fn nanoai_generate_id(handle: NanoaiRuntimeT, prompt: *const c_char, model_id: *const c_char) -> *const c_char;
-    fn nanoai_analyze_document(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
-    fn nanoai_understand_report(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
+    fn nanoai_join_cluster(cluster_id: *const c_char) -> bool;
 }
 
 pub struct NanoRuntime {
@@ -37,12 +36,9 @@ impl NanoRuntime {
         }
     }
 
-    pub fn analyze_document(&self, buffer: &[u8], width: i32, height: i32) -> String {
-        unsafe {
-            let result_ptr = nanoai_analyze_document(self.handle, buffer.as_ptr(), width, height);
-            if result_ptr.is_null() { return String::new(); }
-            CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
-        }
+    pub fn join_cluster(cluster_id: &str) -> bool {
+        let c_id = CString::new(cluster_id).unwrap();
+        unsafe { nanoai_join_cluster(c_id.as_ptr()) }
     }
 }
 

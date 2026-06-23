@@ -35,6 +35,9 @@ const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text);
 // Model Conversion API
 bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type);
 
+// Distributed AI
+bool nanoai_join_cluster(const char* cluster_id);
+
 #ifdef __cplusplus
 } // extern "C"
 
