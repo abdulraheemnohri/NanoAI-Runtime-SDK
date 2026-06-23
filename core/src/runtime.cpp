@@ -8,9 +8,12 @@
 #include "acceleration/selector.h"
 #include "memory/optimizer.h"
 #include "conversion/converter.h"
+#include "networking/network_manager.h"
+#include "service/os_service.h"
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <chrono>
 
 namespace nanoai {
 
@@ -33,22 +36,12 @@ public:
 
         std::unique_ptr<Backend> backend;
         switch (format) {
-            case ModelFormat::ONNX:
-                backend = std::make_unique<OnnxBackend>();
-                break;
+            case ModelFormat::ONNX: backend = std::make_unique<OnnxBackend>(); break;
             case ModelFormat::TFLITE:
-            case ModelFormat::LITERT:
-                backend = std::make_unique<TfLiteBackend>();
-                break;
-            case ModelFormat::GGUF:
-                backend = std::make_unique<GgufBackend>();
-                break;
-            case ModelFormat::OPENVINO:
-                backend = std::make_unique<OpenVinoBackend>();
-                break;
-            case ModelFormat::PYTORCH:
-                backend = std::make_unique<PyTorchBackend>();
-                break;
+            case ModelFormat::LITERT: backend = std::make_unique<TfLiteBackend>(); break;
+            case ModelFormat::GGUF: backend = std::make_unique<GgufBackend>(); break;
+            case ModelFormat::OPENVINO: backend = std::make_unique<OpenVinoBackend>(); break;
+            case ModelFormat::PYTORCH: backend = std::make_unique<PyTorchBackend>(); break;
             default:
                 std::cerr << "Unsupported format for " << modelId << std::endl;
                 return false;
@@ -56,6 +49,7 @@ public:
 
         if (backend && backend->load(modelPath)) {
             m_backends[modelId] = std::move(backend);
+            m_last_used[modelId] = std::chrono::steady_clock::now();
             return true;
         }
         return false;
@@ -64,9 +58,11 @@ public:
     std::string generate(const std::string& prompt, const std::string& modelId) {
         auto it = m_backends.find(modelId);
         if (it != m_backends.end()) {
+            m_last_used[modelId] = std::chrono::steady_clock::now();
             return it->second->generate(prompt);
         }
         if (m_backends.size() == 1 && modelId.empty()) {
+            m_last_used.begin()->second = std::chrono::steady_clock::now();
             return m_backends.begin()->second->generate(prompt);
         }
         return "Error: Model " + modelId + " not loaded.";
@@ -75,17 +71,26 @@ public:
     std::string runTask(const AiTask& task, const std::string& modelId) {
         auto it = m_backends.find(modelId);
         if (it != m_backends.end()) {
+            m_last_used[modelId] = std::chrono::steady_clock::now();
             return it->second->runTask(task);
         }
+
         if (m_backends.size() == 1 && modelId.empty()) {
+            m_last_used.begin()->second = std::chrono::steady_clock::now();
             return m_backends.begin()->second->runTask(task);
         }
+
         return "Error: Model " + modelId + " not loaded.";
     }
 
     bool unloadModel(const std::string& modelId) {
         MemoryOptimizer::handleDynamicUnloading(modelId);
+        m_last_used.erase(modelId);
         return m_backends.erase(modelId) > 0;
+    }
+
+    void performMaintenance() {
+        MemoryOptimizer::checkIdleModels(m_last_used);
     }
 
 private:
@@ -99,6 +104,7 @@ private:
     }
 
     std::unordered_map<std::string, std::unique_ptr<Backend>> m_backends;
+    std::unordered_map<std::string, std::chrono::steady_clock::time_point> m_last_used;
 };
 
 NanoRuntime::NanoRuntime() : pimpl(std::make_unique<Impl>()) {}
@@ -286,6 +292,14 @@ bool nanoai_convert_model(const char* input_path, const char* output_path, int q
     config.optimizeForNPU = true;
     config.enablePruning = false;
     return nanoai::NanoRuntime::convertModel(input_path, output_path, config);
+}
+
+bool nanoai_join_cluster(const char* cluster_id) {
+    return nanoai::NetworkManager::initializeCluster(cluster_id);
+}
+
+bool nanoai_start_os_service() {
+    return nanoai::AiOSService::startService();
 }
 
 } // extern "C"

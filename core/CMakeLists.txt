@@ -9,6 +9,8 @@ set(NANOAI_SOURCES
     src/acceleration/selector.cpp
     src/acceleration/cpu_info.cpp
     src/conversion/converter.cpp
+    src/networking/network_manager.cpp
+    src/service/os_service.cpp
 )
 
 # Check if JNI is available (for Android/Java SDKs)

@@ -37,28 +37,12 @@ Java_org_nanoai_NanoRuntime_nativeGenerate(JNIEnv* env, jobject thiz, jlong hand
     return env->NewStringUTF(result.c_str());
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_org_nanoai_NanoRuntime_nativeSummarizeText(JNIEnv* env, jobject thiz, jlong handle, jstring text) {
-    const char* input = env->GetStringUTFChars(text, nullptr);
-    const char* result = nanoai_summarize_text(reinterpret_cast<nanoai_runtime_t>(handle), input);
-    env->ReleaseStringUTFChars(text, input);
-    return env->NewStringUTF(result);
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_org_nanoai_NanoRuntime_nativeAnalyzeDocument(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
-    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
-    const char* result = nanoai_analyze_document(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
-    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
-    return env->NewStringUTF(result);
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_org_nanoai_NanoRuntime_nativeUnderstandReport(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
-    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
-    const char* result = nanoai_understand_report(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
-    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
-    return env->NewStringUTF(result);
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_nanoai_NanoRuntime_nativeJoinCluster(JNIEnv* env, jobject thiz, jstring cluster_id) {
+    const char* id = env->GetStringUTFChars(cluster_id, nullptr);
+    bool success = nanoai_join_cluster(id);
+    env->ReleaseStringUTFChars(cluster_id, id);
+    return static_cast<jboolean>(success);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

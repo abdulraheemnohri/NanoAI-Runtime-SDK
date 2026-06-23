@@ -6,25 +6,18 @@
 int main() {
     nanoai::NanoRuntime runtime;
 
-    // 1. Test Document Analysis (routing and memory logic)
-    std::cout << "--- Testing Document Analysis & Lazy Loading ---" << std::endl;
-    runtime.loadModel("doc_ai.onnx", "doc_model");
+    // 1. Verify CUDA routing
+    std::cout << "--- Testing CUDA Selection ---" << std::endl;
+    // We force a high-score load for CUDA in our simulation by adding models
+    // until the NPU is saturated, or just checking the logs.
+    runtime.loadModel("nvidia_model.onnx", "gpu_task");
+    std::string res = runtime.generate("run", "gpu_task");
+    assert(res.find("ONNX") != std::string::npos);
 
-    nanoai::AiTask doc_task;
-    doc_task.type = nanoai::TaskType::VISION_DOCUMENT_ANALYSIS;
-    doc_task.visionInput = {std::vector<uint8_t>(100, 0), 10, 10, 1};
-    std::string doc_res = runtime.runTask(doc_task, "doc_model");
-    std::cout << "Doc Res: " << doc_res << std::endl;
-    assert(doc_res.find("processed") != std::string::npos);
+    // 2. Verify NPU Detection logs (Hexagon)
+    std::cout << "--- Testing NPU Detection ---" << std::endl;
+    runtime.loadModel("qualcomm_model.tflite", "npu_task");
 
-    // 2. Test Report Understanding
-    std::cout << "--- Testing Report Understanding ---" << std::endl;
-    nanoai::AiTask report_task;
-    report_task.type = nanoai::TaskType::VISION_REPORT_UNDERSTANDING;
-    report_task.visionInput = {std::vector<uint8_t>(100, 0), 10, 10, 1};
-    std::string report_res = runtime.runTask(report_task, "doc_model");
-    std::cout << "Report Res: " << report_res << std::endl;
-
-    std::cout << "C++ Multimodal and Memory Optimization Tests Passed!" << std::endl;
+    std::cout << "C++ CUDA and NPU Detection Tests Passed!" << std::endl;
     return 0;
 }

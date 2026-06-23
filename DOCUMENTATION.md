@@ -35,31 +35,51 @@ pip install nanoai
 nanoai = "1.0"
 ```
 
-### C++ Integration
-Include headers from `sdks/cpp/include` and link against `libnanoai.so`.
-
 ---
 
-## 2. Usage Guide
+## 2. Usage Examples
 
-### Simple Text Generation (Kotlin/Android)
+### Android / Kotlin Example
 ```kotlin
 val runtime = NanoRuntime()
-runtime.loadModel("gemma-2b.gguf")
-val response = runtime.generate("Hello, who are you?")
-println(response)
+
+runtime.loadModel(
+    "gemma-3n.gguf"
+)
+
+val result = runtime.generate(
+    "Explain AI"
+)
+
+println(result)
 ```
 
-### Vision Tasks (OCR) - JNI Example
-```cpp
-// C API
-const char* text = nanoai_run_ocr(handle, image_buffer, 1920, 1080);
+### Python Example
+```python
+from nanoai import NanoRuntime
+
+rt = NanoRuntime()
+rt.load_model("gemma.gguf")
+print(rt.generate("Hello"))
 ```
 
-### Audio Tasks (Wake Word)
-```cpp
-// C API
-const char* detected = nanoai_detect_wake_word(handle, audio_samples, 16000);
+### Rust Example
+```rust
+use nanoai::NanoRuntime;
+
+fn main() {
+    let runtime = NanoRuntime::new();
+    runtime.load_model("gemma.gguf", "default");
+    let res = runtime.generate("Hi", "default");
+    println!("{}", res);
+}
+```
+
+### Java Example
+```java
+NanoRuntime rt = new NanoRuntime();
+rt.loadModel("gemma.gguf");
+System.out.println(rt.generate("Hello"));
 ```
 
 ---
@@ -67,17 +87,28 @@ const char* detected = nanoai_detect_wake_word(handle, audio_samples, 16000);
 ## 3. Benefits of NanoAI
 
 - **Offline-First**: Run powerful AI models without any internet connection.
-- **Privacy-Focused**: User data never leaves the device.
+- **Privacy-Focused**: User data hamesha device par rehta hai.
 - **Cross-Platform**: Unified API for mobile, desktop, and embedded.
-- **Smart Acceleration**: Automatic detection and utilization of GPU and NPU hardware.
-- **Memory Optimized**: Features model caching, memory mapping, and lazy loading for low-resource environments.
+- **Hardware Acceleration**: Automatically choose GPU or NPU based on device capability.
+- **Memory Optimized**: Features model caching, memory mapping (mmap), and lazy loading.
 - **Multi-Modal**: Native support for Text, Vision, and Audio AI tasks.
 
 ---
 
-## 4. Supported Formats
-- GGUF (Gemma, Llama, Phi)
-- ONNX Runtime
-- TensorFlow Lite / LiteRT
-- OpenVINO
-- PyTorch Export Models
+## 4. Multi-Model Parallel Execution
+NanoAI allows running multiple models in parallel by addressing them with a `modelId`.
+```kotlin
+runtime.loadModel("chat.gguf", "chat_model")
+runtime.loadModel("ocr.onnx", "vision_model")
+
+val chatRes = runtime.generate("Hi", "chat_model")
+val ocrRes = runtime.runOCR(imageBuffer, 1920, 1080) // default routing or specific ID
+```
+
+---
+
+## 5. Model Conversion & Quantization
+Optimize models for edge devices using the built-in converter.
+- **Auto Quantization**: FP32 → FP16, INT8, or INT4.
+- **Smaller Footprint**: Reduce model size by up to 8x.
+- **Faster Inference**: Significant speedups on mobile NPUs.

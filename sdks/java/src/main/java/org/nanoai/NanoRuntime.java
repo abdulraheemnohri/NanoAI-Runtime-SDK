@@ -54,12 +54,8 @@ public class NanoRuntime {
         return nativeGenerate(nativeHandle, prompt, modelId);
     }
 
-    public String analyzeDocument(byte[] buffer, int width, int height) {
-        return nativeAnalyzeDocument(nativeHandle, buffer, width, height);
-    }
-
-    public String understandReport(byte[] buffer, int width, int height) {
-        return nativeUnderstandReport(nativeHandle, buffer, width, height);
+    public boolean joinCluster(String clusterId) {
+        return nativeJoinCluster(nativeHandle, clusterId);
     }
 
     public static boolean convertModel(String inputPath, String outputPath, int quantizationType) {
@@ -71,7 +67,6 @@ public class NanoRuntime {
     private native void nativeDestroy(long handle);
     private native boolean nativeLoadModel(long handle, String modelPath, String modelId);
     private native String nativeGenerate(long handle, String prompt, String modelId);
-    private native String nativeAnalyzeDocument(long handle, byte[] buffer, int width, int height);
-    private native String nativeUnderstandReport(long handle, byte[] buffer, int width, int height);
+    private native boolean nativeJoinCluster(long handle, String clusterId);
     private static native boolean nativeConvertModel(String inputPath, String outputPath, int quantizationType);
 }

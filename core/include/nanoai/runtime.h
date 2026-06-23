@@ -35,6 +35,12 @@ const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text);
 // Model Conversion API
 bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type);
 
+// Distributed AI
+bool nanoai_join_cluster(const char* cluster_id);
+
+// AI OS Layer
+bool nanoai_start_os_service();
+
 #ifdef __cplusplus
 } // extern "C"
 
@@ -68,8 +74,8 @@ public:
                             const std::string& outputPath,
                             const ConversionConfig& config);
 
-private:
     class Impl;
+private:
     std::unique_ptr<Impl> pimpl;
 };
 
