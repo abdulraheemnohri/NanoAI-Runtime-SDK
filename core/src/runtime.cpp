@@ -131,6 +131,26 @@ const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int w
     return result.c_str();
 }
 
+const char* nanoai_detect_objects(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_OBJECT_DETECTION;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_recognize_speech(nanoai_runtime_t handle, const float* samples, int count) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::AUDIO_SPEECH_RECOGNITION;
+    task.audioInput = {std::vector<float>(samples, samples + count), 16000};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
 const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* samples, int count) {
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
     nanoai::AiTask task;

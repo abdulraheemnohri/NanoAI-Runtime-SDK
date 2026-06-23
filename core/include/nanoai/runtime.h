@@ -19,6 +19,8 @@ const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt);
 
 // Task-based API for multi-modal
 const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
+const char* nanoai_detect_objects(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
+const char* nanoai_recognize_speech(nanoai_runtime_t handle, const float* samples, int count);
 const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* samples, int count);
 
 // Model Conversion API
@@ -48,7 +50,6 @@ public:
     std::string generate(const std::string& prompt);
     std::string runTask(const AiTask& task);
 
-    // Static conversion method
     static bool convertModel(const std::string& inputPath,
                             const std::string& outputPath,
                             const ConversionConfig& config);

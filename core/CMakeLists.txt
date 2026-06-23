@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(NANOAI_SOURCES
     src/runtime.cpp
     src/acceleration/selector.cpp
+    src/acceleration/cpu_info.cpp
     src/conversion/converter.cpp
 )
 

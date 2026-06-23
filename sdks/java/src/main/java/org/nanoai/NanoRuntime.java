@@ -6,7 +6,6 @@ public class NanoRuntime {
     private long nativeHandle;
 
     static {
-        // Attempt to load from library path or current directory
         try {
             System.loadLibrary("nanoai");
         } catch (UnsatisfiedLinkError e) {
@@ -47,9 +46,29 @@ public class NanoRuntime {
         return nativeGenerate(nativeHandle, prompt);
     }
 
-    // Native methods (re-using the same JNI bridge)
+    public String runOCR(byte[] buffer, int width, int height) {
+        return nativeRunOCR(nativeHandle, buffer, width, height);
+    }
+
+    public String detectObjects(byte[] buffer, int width, int height) {
+        return nativeDetectObjects(nativeHandle, buffer, width, height);
+    }
+
+    public String recognizeSpeech(float[] samples) {
+        return nativeRecognizeSpeech(nativeHandle, samples);
+    }
+
+    public static boolean convertModel(String inputPath, String outputPath, int quantizationType) {
+        return nativeConvertModel(inputPath, outputPath, quantizationType);
+    }
+
+    // Native methods
     private native long nativeInit();
     private native void nativeDestroy(long handle);
     private native boolean nativeLoadModel(long handle, String modelPath);
     private native String nativeGenerate(long handle, String prompt);
+    private native String nativeRunOCR(long handle, byte[] buffer, int width, int height);
+    private native String nativeDetectObjects(long handle, byte[] buffer, int width, int height);
+    private native String nativeRecognizeSpeech(long handle, float[] samples);
+    private static native boolean nativeConvertModel(String inputPath, String outputPath, int quantizationType);
 }

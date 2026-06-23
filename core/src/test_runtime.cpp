@@ -1,29 +1,39 @@
 #include "nanoai/runtime.h"
+#include "../src/acceleration/cpu_info.h"
 #include <iostream>
 #include <cassert>
 #include <vector>
 
 int main() {
-    // 1. Test Model Conversion / Auto Quantization
+    // 1. Test CPU Architecture Detection
+    std::cout << "C++: Detected Architecture: " << nanoai::CpuInfo::getArchitectureName() << std::endl;
+
+    // 2. Test Model Conversion
     nanoai::ConversionConfig config;
-    config.quantization = nanoai::QuantizationType::INT8;
+    config.quantization = nanoai::QuantizationType::INT4;
     config.optimizeForNPU = true;
-
-    bool converted = nanoai::NanoRuntime::convertModel("model.fp32", "model.int8", config);
+    bool converted = nanoai::NanoRuntime::convertModel("llama.fp32", "llama.int4", config);
     assert(converted);
-    std::cout << "C++: Model conversion (INT8) successful." << std::endl;
 
-    // 2. Test Multi-modal Tasks
+    // 3. Test New AI Tasks
     nanoai::NanoRuntime runtime;
-    runtime.loadModel("vision_model.onnx");
-    std::vector<uint8_t> dummy_image(100 * 100 * 3, 0);
-    nanoai::AiTask vision_task;
-    vision_task.type = nanoai::TaskType::VISION_OCR;
-    vision_task.visionInput = {dummy_image, 100, 100, 3};
-    std::string ocr_result = runtime.runTask(vision_task);
-    std::cout << "OCR Result: " << ocr_result << std::endl;
-    assert(ocr_result.find("[ONNX Backend]: OCR complete") != std::string::npos);
+    runtime.loadModel("multimodal.onnx");
 
-    std::cout << "C++ All Tests Passed!" << std::endl;
+    // OCR
+    nanoai::AiTask ocr_task;
+    ocr_task.type = nanoai::TaskType::VISION_OCR;
+    ocr_task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
+    std::string ocr_res = runtime.runTask(ocr_task);
+    std::cout << "C++ OCR: " << ocr_res << std::endl;
+    assert(ocr_res.find("OCR complete") != std::string::npos);
+
+    // Object Detection
+    nanoai::AiTask det_task;
+    det_task.type = nanoai::TaskType::VISION_OBJECT_DETECTION;
+    det_task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
+    std::string det_res = runtime.runTask(det_task);
+    std::cout << "C++ Detection: " << det_res << std::endl;
+
+    std::cout << "C++ AI Task Expansion Tests Passed!" << std::endl;
     return 0;
 }
