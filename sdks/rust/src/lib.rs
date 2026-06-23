@@ -9,8 +9,14 @@ extern "C" {
     fn nanoai_load_model(handle: NanoaiRuntimeT, model_path: *const c_char) -> bool;
     fn nanoai_generate(handle: NanoaiRuntimeT, prompt: *const c_char) -> *const c_char;
     fn nanoai_run_ocr(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
+    fn nanoai_run_segmentation(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
     fn nanoai_detect_objects(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
+    fn nanoai_analyze_face(handle: NanoaiRuntimeT, buffer: *const u8, width: c_int, height: c_int) -> *const c_char;
     fn nanoai_recognize_speech(handle: NanoaiRuntimeT, samples: *const f32, count: c_int) -> *const c_char;
+    fn nanoai_detect_wake_word(handle: NanoaiRuntimeT, samples: *const f32, count: c_int) -> *const c_char;
+    fn nanoai_summarize_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
+    fn nanoai_translate_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
+    fn nanoai_classify_text(handle: NanoaiRuntimeT, text: *const c_char) -> *const c_char;
     fn nanoai_convert_model(input_path: *const c_char, output_path: *const c_char, quant: c_int) -> bool;
 }
 
@@ -37,18 +43,22 @@ impl NanoRuntime {
         }
     }
 
-    pub fn run_ocr(&self, buffer: &[u8], width: i32, height: i32) -> String {
+    pub fn translate_text(&self, text: &str) -> String {
+        let c_text = CString::new(text).unwrap();
         unsafe {
-            let result_ptr = nanoai_run_ocr(self.handle, buffer.as_ptr(), width, height);
+            let result_ptr = nanoai_translate_text(self.handle, c_text.as_ptr());
             if result_ptr.is_null() { return String::new(); }
             CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
         }
     }
 
-    pub fn convert_model(input_path: &str, output_path: &str, quantization: i32) -> bool {
-        let c_in = CString::new(input_path).unwrap();
-        let c_out = CString::new(output_path).unwrap();
-        unsafe { nanoai_convert_model(c_in.as_ptr(), c_out.as_ptr(), quantization) }
+    pub fn classify_text(&self, text: &str) -> String {
+        let c_text = CString::new(text).unwrap();
+        unsafe {
+            let result_ptr = nanoai_classify_text(self.handle, c_text.as_ptr());
+            if result_ptr.is_null() { return String::new(); }
+            CStr::from_ptr(result_ptr).to_string_lossy().into_owned()
+        }
     }
 }
 

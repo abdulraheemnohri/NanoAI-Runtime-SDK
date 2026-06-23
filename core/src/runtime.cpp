@@ -138,10 +138,30 @@ const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int w
     return result.c_str();
 }
 
+const char* nanoai_run_segmentation(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_SEGMENTATION;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
 const char* nanoai_detect_objects(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
     nanoai::AiTask task;
     task.type = nanoai::TaskType::VISION_OBJECT_DETECTION;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_analyze_face(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_FACE_ANALYSIS;
     task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
     static thread_local std::string result;
     result = runtime->runTask(task);
@@ -163,6 +183,36 @@ const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* sample
     nanoai::AiTask task;
     task.type = nanoai::TaskType::AUDIO_WAKE_WORD;
     task.audioInput = {std::vector<float>(samples, samples + count), 16000};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_summarize_text(nanoai_runtime_t handle, const char* text) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::TEXT_SUMMARIZATION;
+    task.textInput = text;
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_translate_text(nanoai_runtime_t handle, const char* text) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::TEXT_TRANSLATION;
+    task.textInput = text;
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::TEXT_CLASSIFICATION;
+    task.textInput = text;
     static thread_local std::string result;
     result = runtime->runTask(task);
     return result.c_str();

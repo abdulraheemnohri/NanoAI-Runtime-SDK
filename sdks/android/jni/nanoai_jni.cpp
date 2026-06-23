@@ -34,42 +34,68 @@ Java_org_nanoai_NanoRuntime_nativeGenerate(JNIEnv* env, jobject thiz, jlong hand
 }
 
 extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeSummarizeText(JNIEnv* env, jobject thiz, jlong handle, jstring text) {
+    const char* input = env->GetStringUTFChars(text, nullptr);
+    const char* result = nanoai_summarize_text(reinterpret_cast<nanoai_runtime_t>(handle), input);
+    env->ReleaseStringUTFChars(text, input);
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeTranslateText(JNIEnv* env, jobject thiz, jlong handle, jstring text) {
+    const char* input = env->GetStringUTFChars(text, nullptr);
+    const char* result = nanoai_translate_text(reinterpret_cast<nanoai_runtime_t>(handle), input);
+    env->ReleaseStringUTFChars(text, input);
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeClassifyText(JNIEnv* env, jobject thiz, jlong handle, jstring text) {
+    const char* input = env->GetStringUTFChars(text, nullptr);
+    const char* result = nanoai_classify_text(reinterpret_cast<nanoai_runtime_t>(handle), input);
+    env->ReleaseStringUTFChars(text, input);
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
 Java_org_nanoai_NanoRuntime_nativeRunOCR(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
-    auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
     jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
-    jsize len = env->GetArrayLength(buffer);
-    nanoai::AiTask task;
-    task.type = nanoai::TaskType::VISION_OCR;
-    task.visionInput = {std::vector<uint8_t>((uint8_t*)bytes, (uint8_t*)bytes + len), width, height, 3};
-    std::string result = runtime->runTask(task);
+    const char* result = nanoai_run_ocr(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
     env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
-    return env->NewStringUTF(result.c_str());
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeRunSegmentation(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
+    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
+    const char* result = nanoai_run_segmentation(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
+    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
+    return env->NewStringUTF(result);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_org_nanoai_NanoRuntime_nativeDetectObjects(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
-    auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
     jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
-    jsize len = env->GetArrayLength(buffer);
-    nanoai::AiTask task;
-    task.type = nanoai::TaskType::VISION_OBJECT_DETECTION;
-    task.visionInput = {std::vector<uint8_t>((uint8_t*)bytes, (uint8_t*)bytes + len), width, height, 3};
-    std::string result = runtime->runTask(task);
+    const char* result = nanoai_detect_objects(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
     env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
-    return env->NewStringUTF(result.c_str());
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeAnalyzeFace(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
+    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
+    const char* result = nanoai_analyze_face(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
+    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
+    return env->NewStringUTF(result);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_org_nanoai_NanoRuntime_nativeRecognizeSpeech(JNIEnv* env, jobject thiz, jlong handle, jfloatArray samples) {
-    auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
     jfloat* data = env->GetFloatArrayElements(samples, nullptr);
     jsize len = env->GetArrayLength(samples);
-    nanoai::AiTask task;
-    task.type = nanoai::TaskType::AUDIO_SPEECH_RECOGNITION;
-    task.audioInput = {std::vector<float>(data, data + len), 16000};
-    std::string result = runtime->runTask(task);
+    const char* result = nanoai_recognize_speech(reinterpret_cast<nanoai_runtime_t>(handle), data, len);
     env->ReleaseFloatArrayElements(samples, data, JNI_ABORT);
-    return env->NewStringUTF(result.c_str());
+    return env->NewStringUTF(result);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

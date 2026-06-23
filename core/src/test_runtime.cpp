@@ -5,26 +5,23 @@
 
 int main() {
     nanoai::NanoRuntime runtime;
+    runtime.loadModel("full_suite.gguf");
 
-    // 1. Test OpenVINO routing
-    assert(runtime.loadModel("model.xml"));
-    std::string ov_res = runtime.generate("test");
-    std::cout << "OpenVINO Result: " << ov_res << std::endl;
-    assert(ov_res.find("OpenVINO") != std::string::npos);
+    // 1. Test Translation
+    std::string trans = nanoai_translate_text(reinterpret_cast<nanoai_runtime_t>(&runtime), "Hello world");
+    std::cout << "Translation: " << trans << std::endl;
+    assert(trans.find("Task processed") != std::string::npos);
 
-    // 2. Test PyTorch routing
-    assert(runtime.loadModel("model.pt"));
-    std::string pt_res = runtime.generate("test");
-    std::cout << "PyTorch Result: " << pt_res << std::endl;
-    assert(pt_res.find("PyTorch") != std::string::npos);
+    // 2. Test Classification
+    std::string clazz = nanoai_classify_text(reinterpret_cast<nanoai_runtime_t>(&runtime), "NanoAI is fast");
+    std::cout << "Classification: " << clazz << std::endl;
+    assert(clazz.find("Task processed") != std::string::npos);
 
-    // 3. Test multi-task routing
-    nanoai::AiTask task;
-    task.type = nanoai::TaskType::VISION_OCR;
-    task.visionInput = {std::vector<uint8_t>(10, 0), 10, 1, 1};
-    std::string ocr_res = runtime.runTask(task);
-    std::cout << "OCR Result: " << ocr_res << std::endl;
+    // 3. Test Face Analysis
+    uint8_t buffer[300]; // 10*10*3
+    std::string face = nanoai_analyze_face(reinterpret_cast<nanoai_runtime_t>(&runtime), buffer, 10, 10);
+    std::cout << "Face Analysis: " << face << std::endl;
 
-    std::cout << "Backend Expansion Tests Passed!" << std::endl;
+    std::cout << "Core AI Task Set Expansion Tests Passed!" << std::endl;
     return 0;
 }

@@ -25,6 +25,10 @@ class NanoRuntime:
             else:
                 raise RuntimeError(f"Could not load {lib_path}. Please ensure it is in your library path.")
 
+        self._setup_bindings()
+        self.handle = self.lib.nanoai_create()
+
+    def _setup_bindings(self):
         self.lib.nanoai_create.restype = ctypes.c_void_p
         self.lib.nanoai_destroy.argtypes = [ctypes.c_void_p]
         self.lib.nanoai_load_model.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
@@ -32,16 +36,20 @@ class NanoRuntime:
         self.lib.nanoai_generate.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         self.lib.nanoai_generate.restype = ctypes.c_char_p
 
-        self.lib.nanoai_run_ocr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
-        self.lib.nanoai_run_ocr.restype = ctypes.c_char_p
+        for func in ['nanoai_run_ocr', 'nanoai_run_segmentation', 'nanoai_detect_objects', 'nanoai_analyze_face']:
+            f = getattr(self.lib, func)
+            f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
+            f.restype = ctypes.c_char_p
 
-        self.lib.nanoai_detect_objects.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
-        self.lib.nanoai_detect_objects.restype = ctypes.c_char_p
+        for func in ['nanoai_recognize_speech', 'nanoai_detect_wake_word']:
+            f = getattr(self.lib, func)
+            f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int]
+            f.restype = ctypes.c_char_p
 
-        self.lib.nanoai_recognize_speech.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int]
-        self.lib.nanoai_recognize_speech.restype = ctypes.c_char_p
-
-        self.handle = self.lib.nanoai_create()
+        for func in ['nanoai_summarize_text', 'nanoai_translate_text', 'nanoai_classify_text']:
+            f = getattr(self.lib, func)
+            f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+            f.restype = ctypes.c_char_p
 
     def __del__(self):
         if hasattr(self, 'handle') and self.handle:
@@ -56,23 +64,19 @@ class NanoRuntime:
 
     def run_ocr(self, buffer, width, height) -> str:
         data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
-        result = self.lib.nanoai_run_ocr(self.handle, data_ptr, width, height)
-        return result.decode('utf-8')
+        return self.lib.nanoai_run_ocr(self.handle, data_ptr, width, height).decode('utf-8')
 
-    def detect_objects(self, buffer, width, height) -> str:
-        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
-        result = self.lib.nanoai_detect_objects(self.handle, data_ptr, width, height)
-        return result.decode('utf-8')
+    def summarize_text(self, text: str) -> str:
+        return self.lib.nanoai_summarize_text(self.handle, text.encode('utf-8')).decode('utf-8')
 
-    def recognize_speech(self, samples) -> str:
-        data_ptr = (ctypes.c_float * len(samples))(*samples)
-        result = self.lib.nanoai_recognize_speech(self.handle, data_ptr, len(samples))
-        return result.decode('utf-8')
+    def translate_text(self, text: str) -> str:
+        return self.lib.nanoai_translate_text(self.handle, text.encode('utf-8')).decode('utf-8')
+
+    def classify_text(self, text: str) -> str:
+        return self.lib.nanoai_classify_text(self.handle, text.encode('utf-8')).decode('utf-8')
 
     @staticmethod
     def convert_model(input_path: str, output_path: str, quantization_type: int) -> bool:
-        # Static methods need a fresh CDLL load or internal shared reference
-        # For simplicity, we assume the library is already in path
         lib = ctypes.CDLL("libnanoai.so")
         lib.nanoai_convert_model.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
         lib.nanoai_convert_model.restype = ctypes.c_bool

@@ -19,9 +19,14 @@ const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt);
 
 // Task-based API for multi-modal
 const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
+const char* nanoai_run_segmentation(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
 const char* nanoai_detect_objects(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
+const char* nanoai_analyze_face(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
 const char* nanoai_recognize_speech(nanoai_runtime_t handle, const float* samples, int count);
 const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* samples, int count);
+const char* nanoai_summarize_text(nanoai_runtime_t handle, const char* text);
+const char* nanoai_translate_text(nanoai_runtime_t handle, const char* text);
+const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text);
 
 // Model Conversion API
 bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type);
