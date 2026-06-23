@@ -66,12 +66,9 @@ public:
         if (it != m_backends.end()) {
             return it->second->generate(prompt);
         }
-
-        // Fallback for single model usage or if modelId is empty
         if (m_backends.size() == 1 && modelId.empty()) {
             return m_backends.begin()->second->generate(prompt);
         }
-
         return "Error: Model " + modelId + " not loaded.";
     }
 
@@ -80,15 +77,14 @@ public:
         if (it != m_backends.end()) {
             return it->second->runTask(task);
         }
-
         if (m_backends.size() == 1 && modelId.empty()) {
             return m_backends.begin()->second->runTask(task);
         }
-
         return "Error: Model " + modelId + " not loaded.";
     }
 
     bool unloadModel(const std::string& modelId) {
+        MemoryOptimizer::handleDynamicUnloading(modelId);
         return m_backends.erase(modelId) > 0;
     }
 
@@ -140,7 +136,6 @@ bool NanoRuntime::convertModel(const std::string& inputPath,
 
 } // namespace nanoai
 
-// C API Implementation
 extern "C" {
 
 nanoai_runtime_t nanoai_create() {
@@ -209,6 +204,26 @@ const char* nanoai_analyze_face(nanoai_runtime_t handle, const uint8_t* buffer, 
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
     nanoai::AiTask task;
     task.type = nanoai::TaskType::VISION_FACE_ANALYSIS;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_analyze_document(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_DOCUMENT_ANALYSIS;
+    task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
+    static thread_local std::string result;
+    result = runtime->runTask(task);
+    return result.c_str();
+}
+
+const char* nanoai_understand_report(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    nanoai::AiTask task;
+    task.type = nanoai::TaskType::VISION_REPORT_UNDERSTANDING;
     task.visionInput = {std::vector<uint8_t>(buffer, buffer + (width * height * 3)), width, height, 3};
     static thread_local std::string result;
     result = runtime->runTask(task);

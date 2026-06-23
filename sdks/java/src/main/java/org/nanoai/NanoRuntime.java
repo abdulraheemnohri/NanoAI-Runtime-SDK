@@ -54,6 +54,14 @@ public class NanoRuntime {
         return nativeGenerate(nativeHandle, prompt, modelId);
     }
 
+    public String analyzeDocument(byte[] buffer, int width, int height) {
+        return nativeAnalyzeDocument(nativeHandle, buffer, width, height);
+    }
+
+    public String understandReport(byte[] buffer, int width, int height) {
+        return nativeUnderstandReport(nativeHandle, buffer, width, height);
+    }
+
     public static boolean convertModel(String inputPath, String outputPath, int quantizationType) {
         return nativeConvertModel(inputPath, outputPath, quantizationType);
     }
@@ -63,14 +71,7 @@ public class NanoRuntime {
     private native void nativeDestroy(long handle);
     private native boolean nativeLoadModel(long handle, String modelPath, String modelId);
     private native String nativeGenerate(long handle, String prompt, String modelId);
-    private native String nativeRunOCR(long handle, byte[] buffer, int width, int height);
-    private native String nativeRunSegmentation(long handle, byte[] buffer, int width, int height);
-    private native String nativeDetectObjects(long handle, byte[] buffer, int width, int height);
-    private native String nativeAnalyzeFace(long handle, byte[] buffer, int width, int height);
-    private native String nativeRecognizeSpeech(long handle, float[] samples);
-    private native String nativeDetectWakeWord(long handle, float[] samples);
-    private native String nativeSummarizeText(long handle, String text);
-    private native String nativeTranslateText(long handle, String text);
-    private native String nativeClassifyText(long handle, String text);
+    private native String nativeAnalyzeDocument(long handle, byte[] buffer, int width, int height);
+    private native String nativeUnderstandReport(long handle, byte[] buffer, int width, int height);
     private static native boolean nativeConvertModel(String inputPath, String outputPath, int quantizationType);
 }

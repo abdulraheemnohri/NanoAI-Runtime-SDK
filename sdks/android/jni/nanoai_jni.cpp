@@ -46,9 +46,17 @@ Java_org_nanoai_NanoRuntime_nativeSummarizeText(JNIEnv* env, jobject thiz, jlong
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_org_nanoai_NanoRuntime_nativeRunOCR(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
+Java_org_nanoai_NanoRuntime_nativeAnalyzeDocument(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
     jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
-    const char* result = nanoai_run_ocr(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
+    const char* result = nanoai_analyze_document(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
+    env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
+    return env->NewStringUTF(result);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeUnderstandReport(JNIEnv* env, jobject thiz, jlong handle, jbyteArray buffer, jint width, jint height) {
+    jbyte* bytes = env->GetByteArrayElements(buffer, nullptr);
+    const char* result = nanoai_understand_report(reinterpret_cast<nanoai_runtime_t>(handle), (uint8_t*)bytes, width, height);
     env->ReleaseByteArrayElements(buffer, bytes, JNI_ABORT);
     return env->NewStringUTF(result);
 }
