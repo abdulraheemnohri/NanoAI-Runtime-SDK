@@ -31,15 +31,16 @@ class NanoRuntime:
     def _setup_bindings(self):
         self.lib.nanoai_create.restype = ctypes.c_void_p
         self.lib.nanoai_destroy.argtypes = [ctypes.c_void_p]
-
         self.lib.nanoai_load_model_id.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
         self.lib.nanoai_load_model_id.restype = ctypes.c_bool
-
         self.lib.nanoai_generate_id.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
         self.lib.nanoai_generate_id.restype = ctypes.c_char_p
 
-        self.lib.nanoai_run_ocr.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
-        self.lib.nanoai_run_ocr.restype = ctypes.c_char_p
+        for func in ['nanoai_run_ocr', 'nanoai_analyze_document', 'nanoai_understand_report']:
+            if hasattr(self.lib, func):
+                f = getattr(self.lib, func)
+                f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_int]
+                f.restype = ctypes.c_char_p
 
     def __del__(self):
         if hasattr(self, 'handle') and self.handle:
@@ -49,8 +50,15 @@ class NanoRuntime:
         return self.lib.nanoai_load_model_id(self.handle, model_path.encode('utf-8'), model_id.encode('utf-8'))
 
     def generate(self, prompt: str, model_id: str = "default") -> str:
-        result = self.lib.nanoai_generate_id(self.handle, prompt.encode('utf-8'), model_id.encode('utf-8'))
-        return result.decode('utf-8')
+        return self.lib.nanoai_generate_id(self.handle, prompt.encode('utf-8'), model_id.encode('utf-8')).decode('utf-8')
+
+    def analyze_document(self, buffer, width, height) -> str:
+        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
+        return self.lib.nanoai_analyze_document(self.handle, data_ptr, width, height).decode('utf-8')
+
+    def understand_report(self, buffer, width, height) -> str:
+        data_ptr = (ctypes.c_uint8 * len(buffer))(*buffer)
+        return self.lib.nanoai_understand_report(self.handle, data_ptr, width, height).decode('utf-8')
 
     @staticmethod
     def convert_model(input_path: str, output_path: str, quantization_type: int) -> bool:
