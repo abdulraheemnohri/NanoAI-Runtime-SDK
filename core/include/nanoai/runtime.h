@@ -15,7 +15,9 @@ typedef void* nanoai_runtime_t;
 nanoai_runtime_t nanoai_create();
 void nanoai_destroy(nanoai_runtime_t handle);
 bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path);
+bool nanoai_load_model_id(nanoai_runtime_t handle, const char* model_path, const char* model_id);
 const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt);
+const char* nanoai_generate_id(nanoai_runtime_t handle, const char* prompt, const char* model_id);
 
 // Task-based API for multi-modal
 const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
@@ -52,8 +54,13 @@ public:
     ~NanoRuntime();
 
     bool loadModel(const std::string& modelPath, ModelFormat format = ModelFormat::AUTO);
+    bool loadModel(const std::string& modelPath, const std::string& modelId, ModelFormat format = ModelFormat::AUTO);
+
     std::string generate(const std::string& prompt);
+    std::string generate(const std::string& prompt, const std::string& modelId);
+
     std::string runTask(const AiTask& task);
+    std::string runTask(const AiTask& task, const std::string& modelId);
 
     static bool convertModel(const std::string& inputPath,
                             const std::string& outputPath,

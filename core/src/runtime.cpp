@@ -10,15 +10,16 @@
 #include "conversion/converter.h"
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 
 namespace nanoai {
 
 class NanoRuntime::Impl {
 public:
-    Impl() : m_backend(nullptr) {}
+    Impl() {}
     ~Impl() {}
 
-    bool loadModel(const std::string& modelPath, ModelFormat format) {
+    bool loadModel(const std::string& modelPath, const std::string& modelId, ModelFormat format) {
         if (format == ModelFormat::AUTO) {
             format = detectFormat(modelPath);
         }
@@ -26,47 +27,69 @@ public:
         MemoryOptimizer::applyOptimizations(modelPath);
 
         DeviceType device = SmartRuntimeSelector::selectBestDevice();
+        std::cout << "Runtime: Distributing model " << modelId << " to "
+                  << (device == DeviceType::CPU ? "CPU" : (device == DeviceType::GPU ? "GPU" : "NPU"))
+                  << std::endl;
 
+        std::unique_ptr<Backend> backend;
         switch (format) {
             case ModelFormat::ONNX:
-                m_backend = std::make_unique<OnnxBackend>();
+                backend = std::make_unique<OnnxBackend>();
                 break;
             case ModelFormat::TFLITE:
             case ModelFormat::LITERT:
-                m_backend = std::make_unique<TfLiteBackend>();
+                backend = std::make_unique<TfLiteBackend>();
                 break;
             case ModelFormat::GGUF:
-                m_backend = std::make_unique<GgufBackend>();
+                backend = std::make_unique<GgufBackend>();
                 break;
             case ModelFormat::OPENVINO:
-                m_backend = std::make_unique<OpenVinoBackend>();
+                backend = std::make_unique<OpenVinoBackend>();
                 break;
             case ModelFormat::PYTORCH:
-                m_backend = std::make_unique<PyTorchBackend>();
+                backend = std::make_unique<PyTorchBackend>();
                 break;
             default:
-                std::cerr << "Unsupported or unknown model format for path: " << modelPath << std::endl;
+                std::cerr << "Unsupported format for " << modelId << std::endl;
                 return false;
         }
 
-        if (m_backend) {
-            return m_backend->load(modelPath);
+        if (backend && backend->load(modelPath)) {
+            m_backends[modelId] = std::move(backend);
+            return true;
         }
         return false;
     }
 
-    std::string generate(const std::string& prompt) {
-        if (m_backend) {
-            return m_backend->generate(prompt);
+    std::string generate(const std::string& prompt, const std::string& modelId) {
+        auto it = m_backends.find(modelId);
+        if (it != m_backends.end()) {
+            return it->second->generate(prompt);
         }
-        return "Error: No model loaded.";
+
+        // Fallback for single model usage or if modelId is empty
+        if (m_backends.size() == 1 && modelId.empty()) {
+            return m_backends.begin()->second->generate(prompt);
+        }
+
+        return "Error: Model " + modelId + " not loaded.";
     }
 
-    std::string runTask(const AiTask& task) {
-        if (m_backend) {
-            return m_backend->runTask(task);
+    std::string runTask(const AiTask& task, const std::string& modelId) {
+        auto it = m_backends.find(modelId);
+        if (it != m_backends.end()) {
+            return it->second->runTask(task);
         }
-        return "Error: No model loaded.";
+
+        if (m_backends.size() == 1 && modelId.empty()) {
+            return m_backends.begin()->second->runTask(task);
+        }
+
+        return "Error: Model " + modelId + " not loaded.";
+    }
+
+    bool unloadModel(const std::string& modelId) {
+        return m_backends.erase(modelId) > 0;
     }
 
 private:
@@ -79,22 +102,34 @@ private:
         return ModelFormat::AUTO;
     }
 
-    std::unique_ptr<Backend> m_backend;
+    std::unordered_map<std::string, std::unique_ptr<Backend>> m_backends;
 };
 
 NanoRuntime::NanoRuntime() : pimpl(std::make_unique<Impl>()) {}
 NanoRuntime::~NanoRuntime() = default;
 
 bool NanoRuntime::loadModel(const std::string& modelPath, ModelFormat format) {
-    return pimpl->loadModel(modelPath, format);
+    return pimpl->loadModel(modelPath, "default", format);
+}
+
+bool NanoRuntime::loadModel(const std::string& modelPath, const std::string& modelId, ModelFormat format) {
+    return pimpl->loadModel(modelPath, modelId, format);
 }
 
 std::string NanoRuntime::generate(const std::string& prompt) {
-    return pimpl->generate(prompt);
+    return pimpl->generate(prompt, "");
+}
+
+std::string NanoRuntime::generate(const std::string& prompt, const std::string& modelId) {
+    return pimpl->generate(prompt, modelId);
 }
 
 std::string NanoRuntime::runTask(const AiTask& task) {
-    return pimpl->runTask(task);
+    return pimpl->runTask(task, "");
+}
+
+std::string NanoRuntime::runTask(const AiTask& task, const std::string& modelId) {
+    return pimpl->runTask(task, modelId);
 }
 
 bool NanoRuntime::convertModel(const std::string& inputPath,
@@ -121,10 +156,22 @@ bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path) {
     return runtime->loadModel(model_path);
 }
 
+bool nanoai_load_model_id(nanoai_runtime_t handle, const char* model_path, const char* model_id) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    return runtime->loadModel(model_path, model_id);
+}
+
 const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt) {
     auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
     static thread_local std::string result;
     result = runtime->generate(prompt);
+    return result.c_str();
+}
+
+const char* nanoai_generate_id(nanoai_runtime_t handle, const char* prompt, const char* model_id) {
+    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
+    static thread_local std::string result;
+    result = runtime->generate(prompt, model_id);
     return result.c_str();
 }
 
