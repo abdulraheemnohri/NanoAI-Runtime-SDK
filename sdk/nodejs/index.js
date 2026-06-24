@@ -2,7 +2,21 @@ const path = require('path');
 const bindingPath = path.join(__dirname, 'build', 'Release', 'nanoai.node');
 
 try {
-  module.exports = require(bindingPath);
+  const addon = require(bindingPath);
+
+  // High-level wrapper for NRX
+  class NanoRuntime extends addon.NanoRuntime {
+    constructor() {
+      super();
+    }
+
+    runWorkflow(json, input) {
+      const jsonStr = typeof json === 'object' ? JSON.stringify(json) : json;
+      return super.runWorkflow(jsonStr, input);
+    }
+  }
+
+  module.exports = { NanoRuntime };
 } catch (e) {
   const msg = [
     'Failed to load NanoAI Node addon.',

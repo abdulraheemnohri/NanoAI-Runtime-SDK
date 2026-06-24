@@ -1,10 +1,10 @@
 import ctypes
 import os
+import json
 
 class NanoRuntime:
     def __init__(self, lib_path="libnanoai.so"):
         if not os.path.exists(lib_path):
-            # Try build directory for development
             alt_path = os.path.join(os.path.dirname(__file__), "../../../build/libnanoai.so")
             if os.path.exists(alt_path):
                 lib_path = alt_path
@@ -37,6 +37,7 @@ class NanoRuntime:
         self.lib.nanoai_os_dispatch.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         self.lib.nanoai_os_dispatch.restype = ctypes.c_void_p
 
+        # Telemetry & Discovery
         self.lib.nanoai_get_runtime_telemetry.argtypes = [ctypes.c_void_p]
         self.lib.nanoai_get_runtime_telemetry.restype = ctypes.c_void_p
 
@@ -57,8 +58,9 @@ class NanoRuntime:
         return s
 
     def __del__(self):
-        if hasattr(self, 'handle'):
+        if hasattr(self, 'handle') and self.handle:
             self.lib.nanoai_destroy(self.handle)
+            self.handle = None
 
     def load_model(self, model_path, model_id):
         return self.lib.nanoai_load_model(self.handle, model_path.encode(), model_id.encode())
@@ -73,6 +75,8 @@ class NanoRuntime:
         return self._decode_and_free(ptr)
 
     def run_workflow(self, workflow_json, input_data):
+        if isinstance(workflow_json, dict):
+            workflow_json = json.dumps(workflow_json)
         ptr = self.lib.nanoai_run_workflow(self.handle, workflow_json.encode(), input_data.encode())
         return self._decode_and_free(ptr)
 
