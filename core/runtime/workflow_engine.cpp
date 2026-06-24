@@ -1,9 +1,21 @@
 #include "workflow_engine.h"
 #include <iostream>
+
 namespace nanoai {
-WorkflowEngine& WorkflowEngine::getInstance() { static WorkflowEngine instance; return instance; }
-void WorkflowEngine::runPipeline(const std::vector<std::string>& models, const std::string& input) {
-    std::cout << "WorkflowEngine: Starting pipeline..." << std::endl;
-    for (const auto& m : models) std::cout << "WorkflowEngine: Processing with " << m << std::endl;
+
+WorkflowEngine& WorkflowEngine::getInstance() {
+    static WorkflowEngine instance;
+    return instance;
 }
+
+std::string WorkflowEngine::runVisualWorkflow(const std::vector<PipelineNode>& nodes, const std::string& initialInput) {
+    std::cout << "WorkflowEngine: Executing visual pipeline (" << nodes.size() << " nodes)" << std::endl;
+    std::string data = initialInput;
+    for (const auto& node : nodes) {
+        std::cout << "WorkflowEngine: Executing " << node.operation << " on " << node.modelId << std::endl;
+        data = "[" + node.operation + "] " + data;
+    }
+    return data;
 }
+
+} // namespace nanoai

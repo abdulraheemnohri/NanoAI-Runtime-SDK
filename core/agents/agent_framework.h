@@ -16,7 +16,19 @@ public:
 class CodingAgent : public AiAgent {
 public:
     std::string getName() const override { return "CodingAgent"; }
-    std::string run(const std::string& input) override { return "[Coding] Generating code for: " + input; }
+    std::string run(const std::string& input) override { return "[Coding] Optimized logic for: " + input; }
+};
+
+class ResearchAgent : public AiAgent {
+public:
+    std::string getName() const override { return "ResearchAgent"; }
+    std::string run(const std::string& input) override { return "[Research] Found data relevant to: " + input; }
+};
+
+class VisionAgent : public AiAgent {
+public:
+    std::string getName() const override { return "VisionAgent"; }
+    std::string run(const std::string& input) override { return "[Vision] Object map for: " + input; }
 };
 
 class AgentManager {
