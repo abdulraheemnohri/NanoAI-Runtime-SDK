@@ -1,0 +1,7 @@
+NanoAI Runtime X (NRX) v2.5 Architecture Refinement:
+1. Universal HAL ensures multi-vendor support (NVIDIA, Apple, Qualcomm).
+2. Parallel Engine utilizes worker pools for concurrent multimodal inference.
+3. Hardware-aware scheduler incorporates thermal and battery governance.
+4. Cluster Mesh enables LAN discovery and state synchronization.
+5. Swarm Agent framework allows complex task collaboration.
+6. Unified SDK structure supports 10+ languages and frameworks.

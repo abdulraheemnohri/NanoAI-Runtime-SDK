@@ -4,17 +4,49 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(
     core/include
-    core/runtime
-    core/hardware
-    core/memory
-    core/security
+    core/runtime/engine
+    core/runtime/executor
+    core/runtime/scheduler
+    core/runtime/dispatcher
+    core/runtime/pipelines
+    core/runtime/workers
+    core/hardware/discovery
+    core/hardware/profiling
+    core/hardware/monitoring
+    core/hardware/balancing
+    core/memory/allocator
+    core/memory/cache
+    core/memory/compression
+    core/security/sandbox
+    core/security/permissions
+    core/security/verification
     core/telemetry
-    hal
-    backends
-    models
-    cluster
-    agents
-    plugins
+    core/events
+    core/logging
+    core/runtime/config
+    hal/cpu
+    hal/gpu
+    hal/npu
+    backends/nvidia/cuda
+    backends/apple/metal
+    backends/qualcomm/hexagon
+    models/registry
+    models/metadata
+    models/converters
+    models/optimization
+    models/quantization
+    formats
+    scheduler/hardware_aware
+    cluster/discovery
+    cluster/node_manager
+    cluster/workload_manager
+    cluster/synchronization
+    cluster/replication
+    cluster/networking
+    agents/orchestration
+    agents/memory
+    plugins/api
+    plugins/manager
     dashboard/backend/api
 )
 
@@ -23,6 +55,8 @@ file(GLOB_RECURSE SOURCES
     "hal/*.cpp"
     "backends/*.cpp"
     "models/*.cpp"
+    "formats/*.cpp"
+    "scheduler/*.cpp"
     "cluster/*.cpp"
     "agents/*.cpp"
     "plugins/*.cpp"
