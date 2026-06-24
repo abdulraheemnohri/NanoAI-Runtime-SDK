@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <mutex>
 
 namespace nanoai {
 namespace cluster {
@@ -24,6 +24,7 @@ public:
 private:
     MeshNetwork() = default;
     std::vector<PeerInfo> m_peers;
+    std::mutex m_mutex;
 };
 
 } // namespace cluster

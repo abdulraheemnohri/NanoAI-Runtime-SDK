@@ -69,12 +69,7 @@ public:
     }
 
     std::string runWorkflow(const std::string& workflowJson, const std::string& input) {
-        std::vector<PipelineNode> nodes;
-        PipelineNode p1; p1.id = "p1"; p1.type = NodeType::TASK_OCR; p1.modelId = "llm";
-        PipelineNode p2; p2.id = "p2"; p2.type = NodeType::TASK_TRANSLATE; p2.modelId = "llm";
-        nodes.push_back(p1);
-        nodes.push_back(p2);
-        return WorkflowEngine::getInstance().executePipeline(nodes, input);
+        return WorkflowEngine::getInstance().runFromJson(workflowJson, input);
     }
 
     bool bootOS() {

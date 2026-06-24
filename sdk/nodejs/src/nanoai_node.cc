@@ -219,6 +219,41 @@ static napi_value rt_run_workflow(napi_env env, napi_callback_info info) {
   return out;
 }
 
+static napi_value rt_boot_os(napi_env env, napi_callback_info info) {
+  napi_value this_arg;
+  auto* w = unwrap_runtime(env, info, &this_arg);
+  if (!w || !w->handle) return nullptr;
+  bool ok = nanoai_os_boot(w->handle);
+  napi_value out;
+  napi_get_boolean(env, ok, &out);
+  return out;
+}
+
+static napi_value rt_os_dispatch(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
+  napi_value argv[1];
+  napi_value this_arg;
+  if (napi_get_cb_info(env, info, &argc, argv, &this_arg, nullptr) != napi_ok) return nullptr;
+  if (argc < 1) {
+    napi_throw_type_error(env, nullptr, "osDispatch(task) expected 1 arg");
+    return nullptr;
+  }
+
+  NanoRuntimeWrap* w = nullptr;
+  if (napi_unwrap(env, this_arg, reinterpret_cast<void**>(&w)) != napi_ok || !w || !w->handle) return nullptr;
+
+  std::string task;
+  if (!get_utf8(env, argv[0], task)) {
+    napi_throw_type_error(env, nullptr, "osDispatch expects (string)");
+    return nullptr;
+  }
+
+  char* res = nanoai_os_dispatch(w->handle, task.c_str());
+  napi_value out = make_string(env, res);
+  nanoai_string_free(res);
+  return out;
+}
+
 static napi_value rt_get_telemetry(napi_env env, napi_callback_info info) {
   napi_value this_arg;
   auto* w = unwrap_runtime(env, info, &this_arg);
@@ -256,6 +291,8 @@ static napi_value init(napi_env env, napi_value exports) {
       {"generate", 0, rt_generate, 0, 0, 0, napi_default, 0},
       {"runSwarm", 0, rt_run_swarm, 0, 0, 0, napi_default, 0},
       {"runWorkflow", 0, rt_run_workflow, 0, 0, 0, napi_default, 0},
+      {"bootOS", 0, rt_boot_os, 0, 0, 0, napi_default, 0},
+      {"osDispatch", 0, rt_os_dispatch, 0, 0, 0, napi_default, 0},
       {"getTelemetry", 0, rt_get_telemetry, 0, 0, 0, napi_default, 0},
       {"getHardwareProfile", 0, rt_get_hardware_profile, 0, 0, 0, napi_default, 0},
       {"getClusterNodes", 0, rt_get_cluster_nodes, 0, 0, 0, napi_default, 0},
