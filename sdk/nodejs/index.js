@@ -1,7 +1,28 @@
 const ffi = require('ffi-napi');
+const ref = require('ref-napi');
+const ArrayType = require('ref-array-di')(ref);
 const path = require('path');
+const fs = require('fs');
 
-const libPath = path.join(__dirname, 'libnanoai.so');
+const CharPtr = ref.types.CString;
+const CharPtrArray = ArrayType(CharPtr);
+
+function resolveLibPath() {
+  const candidates = [
+    process.env.NANOAI_LIB_PATH,
+    path.join(__dirname, 'libnanoai.so'),
+    path.join(__dirname, '..', '..', 'build', 'libnanoai.so'),
+    path.join(process.cwd(), 'libnanoai.so')
+  ].filter(Boolean);
+
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+
+  return path.join(__dirname, 'libnanoai.so');
+}
+
+const libPath = resolveLibPath();
 
 const nanoai = ffi.Library(libPath, {
   'nanoai_create': ['pointer', []],
@@ -36,11 +57,8 @@ class NanoRuntime {
   }
 
   runSwarm(taskName, agents, inputData) {
-    const agentPtrs = Buffer.alloc(agents.length * 8); // 64-bit pointers
-    agents.forEach((agent, i) => {
-        agentPtrs.writeBigInt64LE(BigInt(ffi.serializeString(agent)), i * 8);
-    });
-    return nanoai.nanoai_run_swarm(this.handle, taskName, agentPtrs, agents.length, inputData);
+    const agentArray = new CharPtrArray(agents);
+    return nanoai.nanoai_run_swarm(this.handle, taskName, agentArray, agents.length, inputData);
   }
 
   runWorkflow(workflowJson, inputData) {

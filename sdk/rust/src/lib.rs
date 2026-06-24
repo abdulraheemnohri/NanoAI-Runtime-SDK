@@ -1,6 +1,7 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_void, c_int};
 
+#[link(name = "nanoai")]
 extern "C" {
     fn nanoai_create() -> *mut c_void;
     fn nanoai_destroy(handle: *mut c_void);
@@ -34,7 +35,7 @@ impl NanoRuntime {
 
     pub fn generate(&self, prompt: &str, model_id: &str, priority: i32) -> String {
         let input = CString::new(prompt).unwrap();
-        let id = CString::new(id).unwrap();
+        let id = CString::new(model_id).unwrap();
         unsafe {
             let res = nanoai_generate(self.handle, input.as_ptr(), id.as_ptr(), priority);
             CStr::from_ptr(res).to_string_lossy().into_owned()
