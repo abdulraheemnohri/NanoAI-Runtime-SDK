@@ -3,21 +3,33 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <functional>
 
 namespace nanoai {
 
+enum class NodeType {
+    INPUT_CAMERA,
+    INPUT_AUDIO,
+    TASK_OCR,
+    TASK_TRANSLATE,
+    TASK_SUMMARIZE,
+    TASK_GENERATE,
+    OUTPUT_VOICE,
+    OUTPUT_UI
+};
+
 struct PipelineNode {
     std::string id;
+    NodeType type;
     std::string modelId;
-    std::string operation; // OCR, TRANSLATE, etc.
-    std::vector<std::string> dependencies;
+    std::vector<std::string> nextNodes;
 };
 
 class WorkflowEngine {
 public:
     static WorkflowEngine& getInstance();
-    std::string runVisualWorkflow(const std::vector<PipelineNode>& nodes, const std::string& initialInput);
+
+    std::string executePipeline(const std::vector<PipelineNode>& nodes, const std::string& initialData);
 };
 
 } // namespace nanoai

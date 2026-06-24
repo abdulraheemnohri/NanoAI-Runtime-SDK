@@ -6,10 +6,13 @@
 #include "../telemetry/telemetry_manager.h"
 #include "../../cluster/node/cluster_manager.h"
 #include "../../cluster/discovery/discovery_service.h"
+#include "../../cluster/synchronization/mesh_network.h"
 #include "../../models/registry/model_registry.h"
 #include "../plugins/plugin_manager.h"
 #include "../security/security_manager.h"
+#include "../memory/memory_manager.h"
 #include "workflow_engine.h"
+#include "os_layer.h"
 #include <iostream>
 #include <memory>
 
@@ -20,8 +23,8 @@ public:
     Impl() {
         hal::HardwareAbstractionLayer::getInstance().discoverHardware();
         ParallelScheduler::getInstance().run();
+        cluster::MeshNetwork::getInstance().joinSwarm("global_mesh_0");
 
-        // Register all built-in agents
         auto& am = agents::AgentManager::getInstance();
         am.registerAgent(std::make_unique<agents::CodingAgent>());
         am.registerAgent(std::make_unique<agents::ResearchAgent>());
@@ -37,8 +40,9 @@ public:
 
     bool loadModel(const std::string& modelPath, const std::string& modelId) {
         security::SecurityManager::getInstance().enforceSandbox(modelId);
+        memory::MemoryManager::getInstance().registerModelUsage(modelId, 4096ULL * 1024 * 1024);
         models::ModelRegistry::getInstance().registerModel(modelId, modelPath);
-        std::cout << "Runtime: Model [" << modelId << "] deployed to HAL." << std::endl;
+        std::cout << "Runtime: Model [" << modelId << "] deployed." << std::endl;
         return true;
     }
 
@@ -46,12 +50,13 @@ public:
         if (!security::SecurityManager::getInstance().validateAccess(modelId, "local_resource")) {
             return "Security Error: Access Denied.";
         }
+        memory::MemoryManager::getInstance().registerModelUsage(modelId, 0);
         if (prompt.find("agent:") == 0) {
             return agents::AgentManager::getInstance().execute(modelId, prompt.substr(6));
         }
         AiTaskRequest req{ "t_" + std::to_string(m_counter++), modelId, prompt, priority };
         ParallelScheduler::getInstance().scheduleTask(req);
-        return "[v2] Task " + req.taskId + " scheduled on " + modelId;
+        return "[v2] Task " + req.taskId + " distributed.";
     }
 
     std::string runSwarm(const std::string& taskName, const std::vector<std::string>& agents, const std::string& input) {
@@ -62,8 +67,21 @@ public:
     }
 
     std::string runWorkflow(const std::string& workflowJson, const std::string& input) {
-        std::vector<PipelineNode> nodes = { {"p1", "llm", "OCR", {}}, {"p2", "llm", "TRANS", {"p1"}} };
-        return WorkflowEngine::getInstance().runVisualWorkflow(nodes, input);
+        std::vector<PipelineNode> nodes;
+        PipelineNode p1; p1.id = "p1"; p1.type = NodeType::TASK_OCR; p1.modelId = "llm";
+        PipelineNode p2; p2.id = "p2"; p2.type = NodeType::TASK_TRANSLATE; p2.modelId = "llm";
+        nodes.push_back(p1);
+        nodes.push_back(p2);
+        return WorkflowEngine::getInstance().executePipeline(nodes, input);
+    }
+
+    bool bootOS() {
+        os::AiOSKernel::getInstance().boot();
+        return true;
+    }
+
+    std::string osDispatch(const std::string& task) {
+        return os::AiOSKernel::getInstance().dispatchGlobalTask(task);
     }
 
     std::string getRuntimeTelemetry() { return telemetry::TelemetryManager::getInstance().getFullReport(); }
@@ -80,6 +98,8 @@ bool NanoRuntime::loadModel(const std::string& p, const std::string& i) { return
 std::string NanoRuntime::generate(const std::string& pr, const std::string& id, TaskPriority pt) { return pimpl->generate(pr, id, pt); }
 std::string NanoRuntime::runSwarm(const std::string& t, const std::vector<std::string>& a, const std::string& i) { return pimpl->runSwarm(t, a, i); }
 std::string NanoRuntime::runWorkflow(const std::string& w, const std::string& i) { return pimpl->runWorkflow(w, i); }
+bool NanoRuntime::bootOS() { return pimpl->bootOS(); }
+std::string NanoRuntime::osDispatch(const std::string& t) { return pimpl->osDispatch(t); }
 std::string NanoRuntime::getRuntimeTelemetry() { return pimpl->getRuntimeTelemetry(); }
 std::string NanoRuntime::getHardwareProfile() { return pimpl->getHardwareProfile(); }
 std::string NanoRuntime::getClusterNodes() { return pimpl->getClusterNodes(); }
