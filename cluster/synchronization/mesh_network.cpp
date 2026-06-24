@@ -1,4 +1,5 @@
 #include "mesh_network.h"
+#include "../discovery/discovery_service.h"
 #include <iostream>
 
 namespace nanoai {
@@ -11,8 +12,13 @@ MeshNetwork& MeshNetwork::getInstance() {
 
 void MeshNetwork::joinSwarm(const std::string& swarmId) {
     std::cout << "MeshNetwork: Joining P2P AI Swarm [" << swarmId << "]" << std::endl;
-    m_peers.push_back({"peer_android_88", "WORKER", 0.95f});
-    m_peers.push_back({"peer_linux_server", "AGENT", 0.99f});
+
+    // Automatically bridge discovery nodes to peers
+    DiscoveryService::getInstance().onNodeFound([this](RemoteNodeInfo node) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_peers.push_back({node.id, "WORKER", 1.0f - node.currentLoad});
+        std::cout << "MeshNetwork: Peer " << node.id << " synchronized from discovery." << std::endl;
+    });
 }
 
 void MeshNetwork::broadcastEvent(const std::string& type, const std::string& payload) {
@@ -20,6 +26,7 @@ void MeshNetwork::broadcastEvent(const std::string& type, const std::string& pay
 }
 
 std::vector<PeerInfo> MeshNetwork::getConnectedPeers() {
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_peers;
 }
 

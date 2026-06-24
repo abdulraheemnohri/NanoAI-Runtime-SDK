@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace nanoai {
 
@@ -30,6 +29,7 @@ public:
     static WorkflowEngine& getInstance();
 
     std::string executePipeline(const std::vector<PipelineNode>& nodes, const std::string& initialData);
+    std::string runFromJson(const std::string& json, const std::string& input);
 };
 
 } // namespace nanoai
