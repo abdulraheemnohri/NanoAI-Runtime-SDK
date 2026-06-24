@@ -1,11 +1,11 @@
 [package]
-name = "nanoai"
+name = "nanoai-runtime-x"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-description = "NanoAI Runtime Rust SDK"
+description = "NanoAI Runtime X (NRX) - Universal AI Orchestration Platform"
 build = "build.rs"
 
 [lib]
-name = "nanoai"
+name = "nanoai-runtime-x"
 path = "src/lib.rs"
