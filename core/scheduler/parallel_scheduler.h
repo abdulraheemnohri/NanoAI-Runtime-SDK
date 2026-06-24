@@ -7,6 +7,7 @@
 #include <thread>
 #include <condition_variable>
 #include <vector>
+#include <atomic>
 #include "nanoai/runtime.h"
 
 namespace nanoai {
@@ -38,7 +39,7 @@ private:
     std::mutex m_queueMutex;
     std::condition_variable m_cv;
     std::vector<std::thread> m_workers;
-    bool m_running;
+    std::atomic<bool> m_running;
 };
 
 } // namespace nanoai

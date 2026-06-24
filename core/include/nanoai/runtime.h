@@ -15,26 +15,28 @@ typedef void* nanoai_runtime_t;
 nanoai_runtime_t nanoai_create();
 void nanoai_destroy(nanoai_runtime_t handle);
 
+void nanoai_string_free(char* str);
+
 // Model Management
 bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path, const char* model_id);
 
 // Parallel Execution API
-const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt, const char* model_id, int priority);
+char* nanoai_generate(nanoai_runtime_t handle, const char* prompt, const char* model_id, int priority);
 
 // Swarm Intelligence (v4)
-const char* nanoai_run_swarm(nanoai_runtime_t handle, const char* task_name, const char** agents, int agent_count, const char* input);
+char* nanoai_run_swarm(nanoai_runtime_t handle, const char* task_name, const char** agents, int agent_count, const char* input);
 
 // Workflow Engine (v4)
-const char* nanoai_run_workflow(nanoai_runtime_t handle, const char* workflow_json, const char* input);
+char* nanoai_run_workflow(nanoai_runtime_t handle, const char* workflow_json, const char* input);
 
 // AI OS Layer (v5)
 bool nanoai_os_boot(nanoai_runtime_t handle);
-const char* nanoai_os_dispatch(nanoai_runtime_t handle, const char* task);
+char* nanoai_os_dispatch(nanoai_runtime_t handle, const char* task);
 
 // Telemetry & Discovery (v3)
-const char* nanoai_get_runtime_telemetry(nanoai_runtime_t handle);
-const char* nanoai_get_hardware_profile(nanoai_runtime_t handle);
-const char* nanoai_get_cluster_nodes(nanoai_runtime_t handle);
+char* nanoai_get_runtime_telemetry(nanoai_runtime_t handle);
+char* nanoai_get_hardware_profile(nanoai_runtime_t handle);
+char* nanoai_get_cluster_nodes(nanoai_runtime_t handle);
 
 #ifdef __cplusplus
 } // extern "C"
