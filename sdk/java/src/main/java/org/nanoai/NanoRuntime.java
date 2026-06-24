@@ -26,6 +26,22 @@ public class NanoRuntime {
         return nativeGenerate(handle, prompt, modelId, priority);
     }
 
+    public String runSwarm(String taskName, String[] agents, String input) {
+        return nativeRunSwarm(handle, taskName, agents, input);
+    }
+
+    public String runWorkflow(String workflowJson, String input) {
+        return nativeRunWorkflow(handle, workflowJson, input);
+    }
+
+    public boolean bootOS() {
+        return nativeBootOS(handle);
+    }
+
+    public String osDispatch(String task) {
+        return nativeOSDispatch(handle, task);
+    }
+
     public String getRuntimeTelemetry() {
         return nativeGetTelemetry(handle);
     }
@@ -42,6 +58,10 @@ public class NanoRuntime {
     private native void nativeDestroy(long handle);
     private native boolean nativeLoadModel(long handle, String modelPath, String modelId);
     private native String nativeGenerate(long handle, String prompt, String modelId, int priority);
+    private native String nativeRunSwarm(long handle, String taskName, String[] agents, String input);
+    private native String nativeRunWorkflow(long handle, String workflowJson, String input);
+    private native boolean nativeBootOS(long handle);
+    private native String nativeOSDispatch(long handle, String task);
     private native String nativeGetTelemetry(long handle);
     private native String nativeGetHardwareProfile(long handle);
     private native String nativeGetClusterNodes(long handle);

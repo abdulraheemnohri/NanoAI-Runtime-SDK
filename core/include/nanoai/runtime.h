@@ -27,6 +27,10 @@ const char* nanoai_run_swarm(nanoai_runtime_t handle, const char* task_name, con
 // Workflow Engine (v4)
 const char* nanoai_run_workflow(nanoai_runtime_t handle, const char* workflow_json, const char* input);
 
+// AI OS Layer (v5)
+bool nanoai_os_boot(nanoai_runtime_t handle);
+const char* nanoai_os_dispatch(nanoai_runtime_t handle, const char* task);
+
 // Telemetry & Discovery (v3)
 const char* nanoai_get_runtime_telemetry(nanoai_runtime_t handle);
 const char* nanoai_get_hardware_profile(nanoai_runtime_t handle);
@@ -56,6 +60,10 @@ public:
     // Advanced Intelligence
     std::string runSwarm(const std::string& taskName, const std::vector<std::string>& agents, const std::string& input);
     std::string runWorkflow(const std::string& workflowJson, const std::string& input);
+
+    // AI OS Layer
+    bool bootOS();
+    std::string osDispatch(const std::string& task);
 
     // Telemetry & Discovery
     std::string getRuntimeTelemetry();

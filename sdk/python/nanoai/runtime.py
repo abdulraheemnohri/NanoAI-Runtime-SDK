@@ -3,6 +3,12 @@ import os
 
 class NanoRuntime:
     def __init__(self, lib_path="libnanoai.so"):
+        if not os.path.exists(lib_path):
+            # Try build directory for development
+            alt_path = os.path.join(os.path.dirname(__file__), "../../../build/libnanoai.so")
+            if os.path.exists(alt_path):
+                lib_path = alt_path
+
         self.lib = ctypes.CDLL(lib_path)
 
         self.lib.nanoai_create.restype = ctypes.c_void_p
@@ -21,6 +27,12 @@ class NanoRuntime:
         # Workflow API
         self.lib.nanoai_run_workflow.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
         self.lib.nanoai_run_workflow.restype = ctypes.c_char_p
+
+        # AI OS Layer
+        self.lib.nanoai_os_boot.argtypes = [ctypes.c_void_p]
+        self.lib.nanoai_os_boot.restype = ctypes.c_bool
+        self.lib.nanoai_os_dispatch.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        self.lib.nanoai_os_dispatch.restype = ctypes.c_char_p
 
         self.lib.nanoai_get_runtime_telemetry.argtypes = [ctypes.c_void_p]
         self.lib.nanoai_get_runtime_telemetry.restype = ctypes.c_char_p
@@ -51,6 +63,13 @@ class NanoRuntime:
 
     def run_workflow(self, workflow_json, input_data):
         res = self.lib.nanoai_run_workflow(self.handle, workflow_json.encode(), input_data.encode())
+        return res.decode()
+
+    def boot_os(self):
+        return self.lib.nanoai_os_boot(self.handle)
+
+    def os_dispatch(self, task):
+        res = self.lib.nanoai_os_dispatch(self.handle, task.encode())
         return res.decode()
 
     def get_telemetry(self):
