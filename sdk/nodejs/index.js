@@ -8,6 +8,8 @@ const nanoai = ffi.Library(libPath, {
   'nanoai_destroy': ['void', ['pointer']],
   'nanoai_load_model': ['bool', ['pointer', 'string', 'string']],
   'nanoai_generate': ['string', ['pointer', 'string', 'string', 'int']],
+  'nanoai_run_swarm': ['string', ['pointer', 'string', 'pointer', 'int', 'string']],
+  'nanoai_run_workflow': ['string', ['pointer', 'string', 'string']],
   'nanoai_get_runtime_telemetry': ['string', ['pointer']],
   'nanoai_get_hardware_profile': ['string', ['pointer']],
   'nanoai_get_cluster_nodes': ['string', ['pointer']]
@@ -31,6 +33,18 @@ class NanoRuntime {
 
   generate(prompt, modelId, priority = 2) {
     return nanoai.nanoai_generate(this.handle, prompt, modelId, priority);
+  }
+
+  runSwarm(taskName, agents, inputData) {
+    const agentPtrs = Buffer.alloc(agents.length * 8); // 64-bit pointers
+    agents.forEach((agent, i) => {
+        agentPtrs.writeBigInt64LE(BigInt(ffi.serializeString(agent)), i * 8);
+    });
+    return nanoai.nanoai_run_swarm(this.handle, taskName, agentPtrs, agents.length, inputData);
+  }
+
+  runWorkflow(workflowJson, inputData) {
+    return nanoai.nanoai_run_workflow(this.handle, workflowJson, inputData);
   }
 
   getTelemetry() {

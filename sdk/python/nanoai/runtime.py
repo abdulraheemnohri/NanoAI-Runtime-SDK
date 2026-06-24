@@ -14,6 +14,14 @@ class NanoRuntime:
         self.lib.nanoai_generate.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
         self.lib.nanoai_generate.restype = ctypes.c_char_p
 
+        # Swarm API
+        self.lib.nanoai_run_swarm.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int, ctypes.c_char_p]
+        self.lib.nanoai_run_swarm.restype = ctypes.c_char_p
+
+        # Workflow API
+        self.lib.nanoai_run_workflow.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.nanoai_run_workflow.restype = ctypes.c_char_p
+
         self.lib.nanoai_get_runtime_telemetry.argtypes = [ctypes.c_void_p]
         self.lib.nanoai_get_runtime_telemetry.restype = ctypes.c_char_p
 
@@ -34,6 +42,15 @@ class NanoRuntime:
 
     def generate(self, prompt, model_id, priority=2):
         res = self.lib.nanoai_generate(self.handle, prompt.encode(), model_id.encode(), priority)
+        return res.decode()
+
+    def run_swarm(self, task_name, agents, input_data):
+        agent_ptrs = (ctypes.c_char_p * len(agents))(*[a.encode() for a in agents])
+        res = self.lib.nanoai_run_swarm(self.handle, task_name.encode(), agent_ptrs, len(agents), input_data.encode())
+        return res.decode()
+
+    def run_workflow(self, workflow_json, input_data):
+        res = self.lib.nanoai_run_workflow(self.handle, workflow_json.encode(), input_data.encode())
         return res.decode()
 
     def get_telemetry(self):
