@@ -32,6 +32,9 @@ const char* nanoai_summarize_text(nanoai_runtime_t handle, const char* text);
 const char* nanoai_translate_text(nanoai_runtime_t handle, const char* text);
 const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text);
 
+// Hardware Info
+const char* nanoai_get_detected_hardware(nanoai_runtime_t handle, const char* model_id);
+
 // Model Conversion API
 bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type);
 
@@ -69,6 +72,8 @@ public:
 
     std::string runTask(const AiTask& task);
     std::string runTask(const AiTask& task, const std::string& modelId);
+
+    std::string getDetectedHardware(const std::string& modelId);
 
     static bool convertModel(const std::string& inputPath,
                             const std::string& outputPath,

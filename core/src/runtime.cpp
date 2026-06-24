@@ -29,10 +29,19 @@ public:
 
         MemoryOptimizer::applyOptimizations(modelPath);
 
-        DeviceType device = SmartRuntimeSelector::selectBestDevice();
-        std::cout << "Runtime: Distributing model " << modelId << " to "
-                  << (device == DeviceType::CPU ? "CPU" : (device == DeviceType::GPU ? "GPU" : "NPU"))
-                  << std::endl;
+        DeviceType deviceType = SmartRuntimeSelector::selectBestDevice();
+        // Capture specific hardware name for reporting
+        std::string hwName = "CPU (Fallback)";
+        auto available = SmartRuntimeSelector::getAvailableDevices();
+        for (const auto& d : available) {
+            if (d.type == deviceType && d.is_available) {
+                hwName = d.name;
+                break;
+            }
+        }
+        m_hardware_names[modelId] = hwName;
+
+        std::cout << "Runtime: Distributed model " << modelId << " to " << hwName << std::endl;
 
         std::unique_ptr<Backend> backend;
         switch (format) {
@@ -42,9 +51,7 @@ public:
             case ModelFormat::GGUF: backend = std::make_unique<GgufBackend>(); break;
             case ModelFormat::OPENVINO: backend = std::make_unique<OpenVinoBackend>(); break;
             case ModelFormat::PYTORCH: backend = std::make_unique<PyTorchBackend>(); break;
-            default:
-                std::cerr << "Unsupported format for " << modelId << std::endl;
-                return false;
+            default: return false;
         }
 
         if (backend && backend->load(modelPath)) {
@@ -62,10 +69,9 @@ public:
             return it->second->generate(prompt);
         }
         if (m_backends.size() == 1 && modelId.empty()) {
-            m_last_used.begin()->second = std::chrono::steady_clock::now();
             return m_backends.begin()->second->generate(prompt);
         }
-        return "Error: Model " + modelId + " not loaded.";
+        return "Error: Model not loaded.";
     }
 
     std::string runTask(const AiTask& task, const std::string& modelId) {
@@ -74,23 +80,18 @@ public:
             m_last_used[modelId] = std::chrono::steady_clock::now();
             return it->second->runTask(task);
         }
+        return "Error: Model not loaded.";
+    }
 
-        if (m_backends.size() == 1 && modelId.empty()) {
-            m_last_used.begin()->second = std::chrono::steady_clock::now();
-            return m_backends.begin()->second->runTask(task);
-        }
-
-        return "Error: Model " + modelId + " not loaded.";
+    std::string getDetectedHardware(const std::string& modelId) {
+        auto it = m_hardware_names.find(modelId);
+        return it != m_hardware_names.end() ? it->second : "Unknown";
     }
 
     bool unloadModel(const std::string& modelId) {
         MemoryOptimizer::handleDynamicUnloading(modelId);
-        m_last_used.erase(modelId);
+        m_hardware_names.erase(modelId);
         return m_backends.erase(modelId) > 0;
-    }
-
-    void performMaintenance() {
-        MemoryOptimizer::checkIdleModels(m_last_used);
     }
 
 private:
@@ -104,6 +105,7 @@ private:
     }
 
     std::unordered_map<std::string, std::unique_ptr<Backend>> m_backends;
+    std::unordered_map<std::string, std::string> m_hardware_names;
     std::unordered_map<std::string, std::chrono::steady_clock::time_point> m_last_used;
 };
 
@@ -119,7 +121,7 @@ bool NanoRuntime::loadModel(const std::string& modelPath, const std::string& mod
 }
 
 std::string NanoRuntime::generate(const std::string& prompt) {
-    return pimpl->generate(prompt, "");
+    return pimpl->generate(prompt, "default");
 }
 
 std::string NanoRuntime::generate(const std::string& prompt, const std::string& modelId) {
@@ -127,11 +129,15 @@ std::string NanoRuntime::generate(const std::string& prompt, const std::string& 
 }
 
 std::string NanoRuntime::runTask(const AiTask& task) {
-    return pimpl->runTask(task, "");
+    return pimpl->runTask(task, "default");
 }
 
 std::string NanoRuntime::runTask(const AiTask& task, const std::string& modelId) {
     return pimpl->runTask(task, modelId);
+}
+
+std::string NanoRuntime::getDetectedHardware(const std::string& modelId) {
+    return pimpl->getDetectedHardware(modelId);
 }
 
 bool NanoRuntime::convertModel(const std::string& inputPath,
@@ -153,27 +159,29 @@ void nanoai_destroy(nanoai_runtime_t handle) {
 }
 
 bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path) {
-    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
-    return runtime->loadModel(model_path);
+    return static_cast<nanoai::NanoRuntime*>(handle)->loadModel(model_path);
 }
 
 bool nanoai_load_model_id(nanoai_runtime_t handle, const char* model_path, const char* model_id) {
-    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
-    return runtime->loadModel(model_path, model_id);
+    return static_cast<nanoai::NanoRuntime*>(handle)->loadModel(model_path, model_id);
 }
 
 const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt) {
-    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
-    static thread_local std::string result;
-    result = runtime->generate(prompt);
-    return result.c_str();
+    static thread_local std::string res;
+    res = static_cast<nanoai::NanoRuntime*>(handle)->generate(prompt);
+    return res.c_str();
 }
 
 const char* nanoai_generate_id(nanoai_runtime_t handle, const char* prompt, const char* model_id) {
-    auto* runtime = static_cast<nanoai::NanoRuntime*>(handle);
-    static thread_local std::string result;
-    result = runtime->generate(prompt, model_id);
-    return result.c_str();
+    static thread_local std::string res;
+    res = static_cast<nanoai::NanoRuntime*>(handle)->generate(prompt, model_id);
+    return res.c_str();
+}
+
+const char* nanoai_get_detected_hardware(nanoai_runtime_t handle, const char* model_id) {
+    static thread_local std::string res;
+    res = static_cast<nanoai::NanoRuntime*>(handle)->getDetectedHardware(model_id);
+    return res.c_str();
 }
 
 const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height) {
