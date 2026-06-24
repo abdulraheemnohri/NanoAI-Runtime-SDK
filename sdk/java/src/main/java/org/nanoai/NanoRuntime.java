@@ -1,16 +1,29 @@
 package org.nanoai;
 
-public class NanoRuntime {
+import java.io.Closeable;
+
+public class NanoRuntime implements AutoCloseable, Closeable {
     private long handle;
 
     static {
-        System.loadLibrary("nanoai");
+        try {
+            System.loadLibrary("nanoai");
+        } catch (UnsatisfiedLinkError e) {
+            // Development fallback
+            String libPath = System.getProperty("user.dir") + "/../../build/libnanoai.so";
+            try {
+                System.load(libPath);
+            } catch (UnsatisfiedLinkError e2) {
+                System.err.println("Could not load libnanoai: " + e2.getMessage());
+            }
+        }
     }
 
     public NanoRuntime() {
         handle = nativeInit();
     }
 
+    @Override
     public void close() {
         if (handle != 0) {
             nativeDestroy(handle);
