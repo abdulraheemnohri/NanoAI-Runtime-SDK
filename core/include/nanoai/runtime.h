@@ -2,9 +2,9 @@
 #define NANOAI_RUNTIME_H
 
 #include <string>
+#include <vector>
 #include <memory>
-#include "ai_task.h"
-#include "model_conversion.h"
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,49 +14,29 @@ typedef void* nanoai_runtime_t;
 
 nanoai_runtime_t nanoai_create();
 void nanoai_destroy(nanoai_runtime_t handle);
-bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path);
-bool nanoai_load_model_id(nanoai_runtime_t handle, const char* model_path, const char* model_id);
-const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt);
-const char* nanoai_generate_id(nanoai_runtime_t handle, const char* prompt, const char* model_id);
 
-// Task-based API for multi-modal
-const char* nanoai_run_ocr(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_run_segmentation(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_detect_objects(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_analyze_face(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_analyze_document(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_understand_report(nanoai_runtime_t handle, const uint8_t* buffer, int width, int height);
-const char* nanoai_recognize_speech(nanoai_runtime_t handle, const float* samples, int count);
-const char* nanoai_detect_wake_word(nanoai_runtime_t handle, const float* samples, int count);
-const char* nanoai_summarize_text(nanoai_runtime_t handle, const char* text);
-const char* nanoai_translate_text(nanoai_runtime_t handle, const char* text);
-const char* nanoai_classify_text(nanoai_runtime_t handle, const char* text);
+// Model Management
+bool nanoai_load_model(nanoai_runtime_t handle, const char* model_path, const char* model_id);
 
-// Hardware Info
-const char* nanoai_get_detected_hardware(nanoai_runtime_t handle, const char* model_id);
+// Parallel Execution API
+const char* nanoai_generate(nanoai_runtime_t handle, const char* prompt, const char* model_id, int priority);
 
-// Model Conversion API
-bool nanoai_convert_model(const char* input_path, const char* output_path, int quantization_type);
-
-// Distributed AI
-bool nanoai_join_cluster(const char* cluster_id);
-
-// AI OS Layer
-bool nanoai_start_os_service();
+// Telemetry & Discovery
+const char* nanoai_get_runtime_telemetry(nanoai_runtime_t handle);
+const char* nanoai_get_hardware_profile(nanoai_runtime_t handle);
+const char* nanoai_get_cluster_nodes(nanoai_runtime_t handle);
 
 #ifdef __cplusplus
 } // extern "C"
 
 namespace nanoai {
 
-enum class ModelFormat {
-    AUTO,
-    ONNX,
-    TFLITE,
-    LITERT,
-    GGUF,
-    OPENVINO,
-    PYTORCH
+enum class TaskPriority {
+    CRITICAL = 0,
+    HIGH = 1,
+    NORMAL = 2,
+    BACKGROUND = 3,
+    IDLE = 4
 };
 
 class NanoRuntime {
@@ -64,20 +44,12 @@ public:
     NanoRuntime();
     ~NanoRuntime();
 
-    bool loadModel(const std::string& modelPath, ModelFormat format = ModelFormat::AUTO);
-    bool loadModel(const std::string& modelPath, const std::string& modelId, ModelFormat format = ModelFormat::AUTO);
+    bool loadModel(const std::string& modelPath, const std::string& modelId);
+    std::string generate(const std::string& prompt, const std::string& modelId, TaskPriority priority = TaskPriority::NORMAL);
 
-    std::string generate(const std::string& prompt);
-    std::string generate(const std::string& prompt, const std::string& modelId);
-
-    std::string runTask(const AiTask& task);
-    std::string runTask(const AiTask& task, const std::string& modelId);
-
-    std::string getDetectedHardware(const std::string& modelId);
-
-    static bool convertModel(const std::string& inputPath,
-                            const std::string& outputPath,
-                            const ConversionConfig& config);
+    std::string getRuntimeTelemetry();
+    std::string getHardwareProfile();
+    std::string getClusterNodes();
 
     class Impl;
 private:

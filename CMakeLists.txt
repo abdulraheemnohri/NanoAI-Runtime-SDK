@@ -1,4 +1,19 @@
 cmake_minimum_required(VERSION 3.10)
-project(nanoai)
-
-add_subdirectory(core)
+project(nanoai_v2)
+set(CMAKE_CXX_STANDARD 17)
+include_directories(
+    core/include
+    core/hardware
+    core/scheduler
+    core/agents
+    core/telemetry
+    core/runtime
+    core/plugins
+    core/security
+    cluster/node
+    models/registry
+)
+file(GLOB_RECURSE SOURCES "core/*.cpp" "cluster/*.cpp" "models/registry/*.cpp")
+add_library(nanoai SHARED ${SOURCES})
+add_executable(v2_test examples/test_runtime_v2.cpp)
+target_link_libraries(v2_test nanoai pthread)
