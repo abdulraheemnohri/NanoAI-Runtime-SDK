@@ -1,7 +1,7 @@
 {
-  "name": "nanoai",
+  "name": "nanoai-runtime-x",
   "version": "0.1.0",
-  "description": "NanoAI Runtime NodeJS SDK",
+  "description": "NanoAI Runtime X (NRX) - Universal AI Orchestration Platform",
   "main": "index.js",
   "license": "Apache-2.0",
   "gypfile": true,

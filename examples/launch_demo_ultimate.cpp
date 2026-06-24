@@ -5,42 +5,40 @@
 #include <chrono>
 
 int main() {
-    nanoai::NanoRuntime runtime;
-    std::cout << "🌌 NANOAI RUNTIME v2.5 — THE UNIVERSAL AI OS LAYER 🌌" << std::endl;
+    std::cout << "🌌 NANOAI RUNTIME X — THE ULTIMATE AI ORCHESTRATION LAYER 🌌" << std::endl;
 
-    // 1. BOOT OS LAYER (v5 Vision)
-    std::cout << "\n[1] INITIALIZING AI OS KERNEL..." << std::endl;
-    runtime.bootOS();
-    std::cout << runtime.osDispatch("SYSTEM_HEALTH_CHECK") << std::endl;
+    nanoai::NanoRuntime nrx;
 
-    // 2. UNIVERSAL HARDWARE DISCOVERY (v2)
-    std::cout << "\n[2] AUTO-DETECTING DISPARATE HARDWARE..." << std::endl;
-    std::cout << runtime.getHardwareProfile() << std::endl;
+    std::cout << "\n[1] HARDWARE AUTO-DISCOVERY..." << std::endl;
+    std::cout << nrx.getHardwareProfile() << std::endl;
 
-    // 3. PARALLEL DEPLOYMENT (v2)
-    std::cout << "\n[3] DEPLOYING MODELS ACROSS CLUSTER..." << std::endl;
-    runtime.loadModel("gemma-9b.gguf", "core_llm");
-    runtime.loadModel("whisper.onnx", "voice_stt");
+    std::cout << "\n[2] DEPLOYING MULTI-MODAL PARALLEL PIPELINE..." << std::endl;
+    // Map models to specific hardware targets
+    nrx.loadModel("gemma-2b.gguf", "core_llm");      // Target: NPU
+    nrx.loadModel("whisper-v3.onnx", "voice_stt");    // Target: GPU
+    nrx.loadModel("yolov8.tflite", "vision_det");     // Target: GPU
+    nrx.loadModel("bge-small.gguf", "embeddings");    // Target: CPU
+    nrx.loadModel("ocr-v2.bin", "ocr_engine");        // Target: DSP
 
-    // 4. DISTRIBUTED CLUSTER (v3)
-    std::cout << "\n[4] SYNCHRONIZING WITH LAN PEERS..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "Nodes: " << runtime.getClusterNodes() << std::endl;
+    std::cout << "\n[3] INITIATING SWARM COLLABORATION..." << std::endl;
+    std::vector<std::string> swarm = {"ResearchAgent", "CodingAgent", "VisionAgent", "SpeechAgent"};
+    std::string swarmRes = nrx.runSwarm("AUTONOMOUS_RESEARCH", swarm, "Analyze current hardware telemetry and optimize load.");
+    std::cout << "Swarm: " << swarmRes << std::endl;
 
-    // 5. SWARM COLLABORATION (v4)
-    std::cout << "\n[5] EXECUTING MULTI-AGENT SWARM..." << std::endl;
-    std::vector<std::string> agents = {"ResearchAgent", "CodingAgent"};
-    std::cout << "Swarm Result: " << runtime.runSwarm("AUTON_DEV", agents, "Build a quantum simulator") << std::endl;
+    std::cout << "\n[4] EXECUTING VISUAL WORKFLOW..." << std::endl;
+    std::string flow = R"({"pipeline": ["ocr", "translate", "summarize"]})";
+    std::string flowRes = nrx.runWorkflow(flow, "multi_modal_stream_0xAF3");
+    std::cout << "Workflow: " << flowRes << std::endl;
 
-    // 6. PIPELINE ORCHESTRATION (v4)
-    std::cout << "\n[6] RUNNING VISUAL PIPELINE..." << std::endl;
-    std::cout << runtime.runWorkflow("{}", "input_stream_01") << std::endl;
+    std::cout << "\n[5] BOOTING AI OS KERNEL..." << std::endl;
+    if (nrx.bootOS()) {
+        std::cout << "OS Layer: " << nrx.osDispatch("GLOBAL_LOAD_REBALANCE") << std::endl;
+    }
 
-    // 7. TELEMETRY MONITORING
-    std::cout << "\n[7] REAL-TIME TELEMETRY..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << runtime.getRuntimeTelemetry() << std::endl;
+    std::cout << "\n[6] REAL-TIME PERFORMANCE METRICS..." << std::endl;
+    std::cout << nrx.getRuntimeTelemetry() << std::endl;
 
-    std::cout << "\n🌟 NANOAI: THE FUTURE OF ON-DEVICE INTELLIGENCE IS HERE. 🌟" << std::endl;
+    std::cout << "\n🌟 NRX: THE FUTURE OF ON-DEVICE INTELLIGENCE IS HERE. 🌟" << std::endl;
+
     return 0;
 }
