@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoAI | Mission Control Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #060E1D; color: #E6F1FF; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(13, 25, 48, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 255, 218, 0.1);
+        }
+        .glow-cyan { text-shadow: 0 0 10px #64FFDA; }
+        .glow-green { text-shadow: 0 0 10px #00FF41; }
+        .border-glow { border: 1px solid rgba(100, 255, 218, 0.3); box-shadow: 0 0 15px rgba(100, 255, 218, 0.1); }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-screen-2xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center glass p-6 rounded-xl border-glow">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tighter text-cyan-400">NANOAI <span class="text-white">v2.0</span></h1>
+                <p class="text-xs text-slate-400 mono mt-1">STATUS: OPERATIONAL | CLUSTER: 4 NODES ACTIVE</p>
+            </div>
+            <div class="flex space-x-4 items-center">
+                <div class="text-right">
+                    <p class="text-xs text-slate-500 mono">LOCAL TIME</p>
+                    <p class="text-lg mono" id="clock">12:04:55</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/50">
+                    <i class="fas fa-microchip text-cyan-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left Column: Telemetry -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <!-- Hardware Usage -->
+                <div class="glass p-6 rounded-xl space-y-6">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Hardware Telemetry</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 mono">
+                                <span>CPU USAGE (AMD RYZEN 9)</span>
+                                <span class="text-cyan-400">12%</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-cyan-500 w-[12%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 mono">
+                                <span>GPU USAGE (RTX 5090)</span>
+                                <span class="text-purple-400">45%</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-purple-500 w-[45%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 mono">
+                                <span>NPU USAGE (QUALCOMM)</span>
+                                <span class="text-green-400">88%</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 w-[88%]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <canvas id="usageChart" height="200"></canvas>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-4 rounded-xl border border-slate-700/50">
+                        <p class="text-[10px] text-slate-500 uppercase mono">Temperature</p>
+                        <p class="text-2xl font-bold">45.2°C</p>
+                    </div>
+                    <div class="glass p-4 rounded-xl border border-slate-700/50">
+                        <p class="text-[10px] text-slate-500 uppercase mono">Power Draw</p>
+                        <p class="text-2xl font-bold text-yellow-400">158W</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Model Monitor & Cluster -->
+            <div class="col-span-12 lg:col-span-5 space-y-6">
+                <!-- Active Models -->
+                <div class="glass rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Active AI Models</h2>
+                    </div>
+                    <div class="p-0">
+                        <table class="w-full text-left text-xs mono">
+                            <thead class="bg-slate-900/50 text-slate-500">
+                                <tr>
+                                    <th class="p-4 font-normal">MODEL ID</th>
+                                    <th class="p-4 font-normal">HARDWARE</th>
+                                    <th class="p-4 font-normal">TOKENS/S</th>
+                                    <th class="p-4 font-normal">LATENCY</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50">
+                                <tr>
+                                    <td class="p-4 text-cyan-400">llama-3-8b</td>
+                                    <td class="p-4 text-slate-300">RTX 5090</td>
+                                    <td class="p-4 font-bold">124.5</td>
+                                    <td class="p-4">12ms</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-cyan-400">whisper-v3</td>
+                                    <td class="p-4 text-slate-300">Qualcomm NPU</td>
+                                    <td class="p-4 font-bold">88.2</td>
+                                    <td class="p-4">45ms</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-cyan-400">yolov8-detect</td>
+                                    <td class="p-4 text-slate-300">CPU (16 Cores)</td>
+                                    <td class="p-4 font-bold">15.0</td>
+                                    <td class="p-4">8ms</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Cluster Visualization -->
+                <div class="glass p-6 rounded-xl">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6">Distributed AI Cluster</h2>
+                    <div class="flex justify-between items-center px-10">
+                        <div class="flex flex-col items-center space-y-2">
+                            <div class="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500 flex items-center justify-center">
+                                <i class="fas fa-laptop text-cyan-400"></i>
+                            </div>
+                            <span class="text-[10px] mono">HOST_DEV</span>
+                        </div>
+                        <div class="h-[1px] flex-1 bg-cyan-500/20 relative">
+                             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2">
+                            <div class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
+                                <i class="fas fa-mobile-alt text-slate-500"></i>
+                            </div>
+                            <span class="text-[10px] mono text-slate-500">NODE_A</span>
+                        </div>
+                        <div class="h-[1px] flex-1 bg-cyan-500/20"></div>
+                        <div class="flex flex-col items-center space-y-2">
+                            <div class="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
+                                <i class="fas fa-server text-slate-500"></i>
+                            </div>
+                            <span class="text-[10px] mono text-slate-500">SERVER_X</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: HAL & Logs -->
+            <div class="col-span-12 lg:col-span-3 space-y-6">
+                <!-- HAL Discovery -->
+                <div class="glass p-6 rounded-xl space-y-4">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">HAL Discovery (JSON)</h2>
+                    <pre class="text-[10px] text-green-400 bg-black/40 p-4 rounded-lg mono overflow-x-auto">
+{
+  "cpu": "Ryzen 9 7950X",
+  "gpu": "RTX 5090",
+  "npu": "Ryzen AI",
+  "ram": "64GB",
+  "vram": "32GB",
+  "score": 98
+}</pre>
+                </div>
+
+                <!-- Execution Logs -->
+                <div class="glass p-6 rounded-xl space-y-4 h-[400px] flex flex-col">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Execution Logs</h2>
+                    <div class="flex-1 overflow-y-auto scroll-hide space-y-2 text-[10px] mono text-slate-400" id="logs">
+                        <p class="text-cyan-500">[0.001s] NanoAI HAL Initialized.</p>
+                        <p class="text-slate-500">[0.124s] Discovered Qualcomm NPU.</p>
+                        <p class="text-slate-500">[0.255s] Loaded gemma-3b-int4.gguf</p>
+                        <p class="text-green-500">[0.258s] Parallel Scheduler Running.</p>
+                        <p class="text-slate-500">[1.002s] Task t_001 -> NPU.</p>
+                        <p class="text-slate-500">[1.455s] Task t_001 Finished.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+        // Chart
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1s', '2s', '3s', '4s', '5s', '6s'],
+                datasets: [{
+                    label: 'NPU Load',
+                    data: [65, 88, 70, 92, 85, 88],
+                    borderColor: '#00FF41',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0
+                }, {
+                    label: 'GPU Load',
+                    data: [30, 45, 40, 50, 42, 45],
+                    borderColor: '#64FFDA',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
+
+        // Logs animation
+        const logs = document.getElementById('logs');
+        setInterval(() => {
+            const p = document.createElement('p');
+            p.className = 'text-slate-500';
+            p.innerText = `[${(Math.random()*10).toFixed(3)}s] Executing AiTask on HAL Layer...`;
+            logs.appendChild(p);
+            if(logs.children.length > 20) logs.removeChild(logs.firstChild);
+            logs.scrollTop = logs.scrollHeight;
+        }, 2000);
+    </script>
+</body>
+</html>
