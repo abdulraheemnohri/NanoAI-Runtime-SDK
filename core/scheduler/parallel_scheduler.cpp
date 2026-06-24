@@ -23,8 +23,8 @@ void ParallelScheduler::scheduleTask(const AiTaskRequest& request) {
 }
 
 void ParallelScheduler::run() {
-    if (m_running) return;
-    m_running = true;
+    bool expected = false;
+    if (!m_running.compare_exchange_strong(expected, true)) return;
     cluster::DiscoveryService::getInstance().startDiscovery();
     int threads = std::thread::hardware_concurrency();
     if (threads == 0) threads = 4;
@@ -36,7 +36,7 @@ void ParallelScheduler::run() {
 void ParallelScheduler::stop() {
     {
         std::lock_guard<std::mutex> lock(m_queueMutex);
-        m_running = false;
+        m_running.store(false);
     }
     m_cv.notify_all();
     for (auto& w : m_workers) if (w.joinable()) w.join();
@@ -49,8 +49,8 @@ void ParallelScheduler::workerThread() {
         AiTaskRequest task;
         {
             std::unique_lock<std::mutex> lock(m_queueMutex);
-            m_cv.wait(lock, [this] { return !m_taskQueue.empty() || !m_running; });
-            if (!m_running && m_taskQueue.empty()) break;
+            m_cv.wait(lock, [this] { return !m_taskQueue.empty() || !m_running.load(); });
+            if (!m_running.load() && m_taskQueue.empty()) break;
             task = m_taskQueue.top();
             m_taskQueue.pop();
         }

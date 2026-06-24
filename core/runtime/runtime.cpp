@@ -14,6 +14,7 @@
 #include "workflow_engine.h"
 #include "os_layer.h"
 #include <iostream>
+#include <atomic>
 #include <memory>
 
 namespace nanoai {
@@ -54,7 +55,8 @@ public:
         if (prompt.find("agent:") == 0) {
             return agents::AgentManager::getInstance().execute(modelId, prompt.substr(6));
         }
-        AiTaskRequest req{ "t_" + std::to_string(m_counter++), modelId, prompt, priority };
+        int counter = m_counter.fetch_add(1, std::memory_order_relaxed);
+        AiTaskRequest req{ "t_" + std::to_string(counter), modelId, prompt, priority };
         ParallelScheduler::getInstance().scheduleTask(req);
         return "[v2] Task " + req.taskId + " distributed.";
     }
@@ -89,7 +91,7 @@ public:
     std::string getClusterNodes() { return cluster::ClusterManager::getInstance().getNodes(); }
 
 private:
-    int m_counter = 0;
+    std::atomic<int> m_counter{0};
 };
 
 NanoRuntime::NanoRuntime() : pimpl(std::make_unique<Impl>()) {}

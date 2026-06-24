@@ -4,9 +4,8 @@
   "description": "NanoAI Runtime NodeJS SDK",
   "main": "index.js",
   "license": "Apache-2.0",
-  "dependencies": {
-    "ffi-napi": "^4.0.3",
-    "ref-array-di": "^1.2.2",
-    "ref-napi": "^3.0.3"
+  "gypfile": true,
+  "scripts": {
+    "install": "node-gyp rebuild"
   }
 }
