@@ -4,6 +4,20 @@
   "description": "NanoAI Runtime NodeJS SDK",
   "main": "index.js",
   "license": "Apache-2.0",
+  "files": [
+    "index.js",
+    "binding.gyp",
+    "src/**/*.cc"
+  ],
+  "keywords": [
+    "ai",
+    "runtime",
+    "native-addon",
+    "offline"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "gypfile": true,
   "scripts": {
     "install": "node-gyp rebuild"

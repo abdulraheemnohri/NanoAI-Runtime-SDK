@@ -26,13 +26,24 @@ dependencies {
 ### Python Integration
 ```bash
 pip install nanoai
-# Ensure libnanoai.so is in your LD_LIBRARY_PATH
+# Set NANOAI_LIB_PATH=/absolute/path/to/libnanoai.so
+# or place libnanoai.so in LD_LIBRARY_PATH
 ```
 
 ### Rust Integration
 ```toml
 [dependencies]
-nanoai = "1.0"
+nanoai = "0.1"
+```
+
+Set `NANOAI_LIB_DIR` or `NANOAI_INSTALL_DIR` if `libnanoai.so` is not in a standard linker path.
+
+### Node.js Integration
+```bash
+cd sdk/nodejs
+npm install
+# Build the root native library first:
+# cmake -S . -B build && cmake --build build
 ```
 
 ---
@@ -44,11 +55,14 @@ nanoai = "1.0"
 val runtime = NanoRuntime()
 
 runtime.loadModel(
-    "gemma-3n.gguf"
+    "gemma-3n.gguf",
+    "default"
 )
 
 val result = runtime.generate(
-    "Explain AI"
+    "Explain AI",
+    "default",
+    2
 )
 
 println(result)
@@ -58,9 +72,10 @@ println(result)
 ```python
 from nanoai import NanoRuntime
 
-rt = NanoRuntime()
-rt.load_model("gemma.gguf")
-print(rt.generate("Hello"))
+with NanoRuntime() as rt:
+    rt.load_model("gemma.gguf", "default")
+    print(rt.generate("Hello", "default", 2))
+    print(rt.get_runtime_telemetry())
 ```
 
 ### Rust Example
@@ -70,16 +85,20 @@ use nanoai::NanoRuntime;
 fn main() {
     let runtime = NanoRuntime::new();
     runtime.load_model("gemma.gguf", "default");
-    let res = runtime.generate("Hi", "default");
+    let res = runtime.generate("Hi", "default", 2);
+    let workflow_res = runtime.run_workflow("{\"nodes\":[]}", "input");
     println!("{}", res);
+    println!("{}", workflow_res);
 }
 ```
 
 ### Java Example
 ```java
 NanoRuntime rt = new NanoRuntime();
-rt.loadModel("gemma.gguf");
-System.out.println(rt.generate("Hello"));
+rt.loadModel("gemma.gguf", "default");
+System.out.println(rt.generate("Hello", "default", 2));
+System.out.println(rt.getRuntimeTelemetry());
+rt.close();
 ```
 
 ---
@@ -101,7 +120,7 @@ NanoAI allows running multiple models in parallel by addressing them with a `mod
 runtime.loadModel("chat.gguf", "chat_model")
 runtime.loadModel("ocr.onnx", "vision_model")
 
-val chatRes = runtime.generate("Hi", "chat_model")
+val chatRes = runtime.generate("Hi", "chat_model", 2)
 val ocrRes = runtime.runOCR(imageBuffer, 1920, 1080) // default routing or specific ID
 ```
 

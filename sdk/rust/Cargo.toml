@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "NanoAI Runtime Rust SDK"
+repository = "https://github.com/abdulraheemnohri/NanoAI-Runtime-SDK"
+homepage = "https://github.com/abdulraheemnohri/NanoAI-Runtime-SDK"
+documentation = "https://github.com/abdulraheemnohri/NanoAI-Runtime-SDK/tree/main/docs/api"
+keywords = ["ai", "runtime", "offline", "ffi"]
+categories = ["api-bindings"]
 build = "build.rs"
 
 [lib]
