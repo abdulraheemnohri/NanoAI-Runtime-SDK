@@ -1,0 +1,15 @@
+{
+  "platinum_sponsors": [
+    { "name": "Global AI Foundation", "contribution": "$50,000", "status": "Founding Partner" },
+    { "name": "Edge Silicon Corp", "contribution": "$25,000", "status": "Hardware Partner" }
+  ],
+  "gold_sponsors": [
+    { "name": "PrivacyFirst Devs", "tier": "Gold" },
+    { "name": "OpenSource Hub", "tier": "Gold" }
+  ],
+  "community_contributors": [
+    "jules_dev",
+    "edge_master",
+    "ai_pioneer_88"
+  ]
+}

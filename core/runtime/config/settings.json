@@ -1,0 +1,21 @@
+{
+  "engine": {
+    "worker_threads": 8,
+    "task_timeout_ms": 5000,
+    "pin_to_cores": true
+  },
+  "cluster": {
+    "node_discovery": true,
+    "failover_enabled": true,
+    "sync_interval_s": 10
+  },
+  "hardware": {
+    "auto_discovery": true,
+    "prefer_npu": true,
+    "eco_mode": false
+  },
+  "security": {
+    "strict_sandbox": true,
+    "integrity_check": true
+  }
+}
