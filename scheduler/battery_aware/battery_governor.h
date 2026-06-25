@@ -4,13 +4,21 @@
 namespace nanoai {
 namespace scheduler {
 
+enum class PowerMode { PERFORMANCE, BALANCED, POWER_SAVER };
+
 class BatteryGovernor {
 public:
-    static bool shouldThrottlingForPower() {
-        // Simulated: true if battery low
-        return false;
-    }
+    static BatteryGovernor& getInstance();
+
+    int getBatteryLevel();
+    PowerMode getOptimalPowerMode();
+    bool shouldThrottlingForPower();
+
+private:
+    BatteryGovernor() = default;
 };
 
-} }
-#endif
+} // namespace scheduler
+} // namespace nanoai
+
+#endif // NANOAI_BATTERY_GOVERNOR_H

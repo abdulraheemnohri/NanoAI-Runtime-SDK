@@ -1,6 +1,8 @@
 #include "parallel_scheduler.h"
 #include "../../hardware/discovery/hal.h"
 #include "../../../cluster/discovery/discovery.h"
+#include "../../../scheduler/thermal_aware/thermal_governor.h"
+#include "../../../scheduler/battery_aware/battery_governor.h"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
@@ -47,9 +49,16 @@ void ParallelScheduler::stop() {
 
 static float calculateDeviceScore(const hal::DeviceCapability& cap, float load) {
     float base = cap.performanceScore;
-    // Penalize high load
     float availability = 1.0f - load;
-    return base * availability;
+
+    // Incorporate Resource Governance
+    float thermalFactor = scheduler::ThermalGovernor::getInstance().getThrottlingFactor();
+    bool powerThrottling = scheduler::BatteryGovernor::getInstance().shouldThrottlingForPower();
+
+    float score = base * availability * thermalFactor;
+    if (powerThrottling) score *= 0.5f; // Aggressive power saving
+
+    return score;
 }
 
 void ParallelScheduler::workerThread() {
@@ -63,17 +72,19 @@ void ParallelScheduler::workerThread() {
             m_taskQueue.pop();
         }
 
-        // NRX Advanced Scheduling Logic
+        // NRX Advanced Scheduling Logic (Thermal & Battery Aware)
         auto remoteNodes = cluster::DiscoveryService::getInstance().getDiscoveredNodes();
         bool processed = false;
 
-        // 1. Cluster Load Balancing
-        if (!remoteNodes.empty() && task.priority != TaskPriority::CRITICAL) {
+        bool isThermalStressed = scheduler::ThermalGovernor::getInstance().isOverheating();
+
+        // 1. Cluster Load Balancing (Prioritize if local thermal/battery stress)
+        if (!remoteNodes.empty() && (task.priority != TaskPriority::CRITICAL || isThermalStressed)) {
             auto it = std::min_element(remoteNodes.begin(), remoteNodes.end(),
                 [](const auto& a, const auto& b) { return a.currentLoad < b.currentLoad; });
 
-            if (it->currentLoad < 0.2f) {
-                std::cout << "Scheduler: [Cluster] Offloading " << task.taskId << " to " << it->id << " (Load: " << it->currentLoad << ")" << std::endl;
+            if (it->currentLoad < 0.4f) {
+                std::cout << "Scheduler: [Cluster-Offload] Reason: " << (isThermalStressed ? "Thermal" : "Load") << " | Target: " << it->id << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(150));
                 processed = true;
             }
@@ -88,7 +99,6 @@ void ParallelScheduler::workerThread() {
             for (auto& d : devices) {
                 float score = calculateDeviceScore(d->getCapability(), d->currentLoad());
 
-                // Bonus for task-specific hardware
                 if (task.modelId.find("vision") != std::string::npos && d->getCapability().category == hal::DeviceCategory::GPU) score += 20.0f;
                 if (task.modelId.find("chat") != std::string::npos && d->getCapability().category == hal::DeviceCategory::NPU) score += 20.0f;
 
@@ -99,8 +109,8 @@ void ParallelScheduler::workerThread() {
             }
 
             if (bestDevice) {
-                std::cout << "Scheduler: [Local] Task " << task.taskId << " -> " << bestDevice->getCapability().name
-                          << " (Score: " << bestScore << ")" << std::endl;
+                std::cout << "Scheduler: [Local-Gov] Task " << task.taskId << " -> " << bestDevice->getCapability().name
+                          << " (Adj-Score: " << bestScore << ")" << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(300));
             }
         }

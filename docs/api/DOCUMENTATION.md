@@ -1,114 +1,37 @@
-# NanoAI Runtime SDK Documentation
+# NanoAI Runtime X (NRX) v2.5 Documentation
 
-NanoAI is a universal offline AI runtime for running local AI models across Android, Windows, Linux, macOS, and edge devices.
+NRX is a universal offline AI runtime designed for parallel multi-model execution and hardware-aware orchestration.
 
-## 1. Integration Guide
+## 🚀 Key APIs
 
-### Android Integration
-Add the following to your `build.gradle`:
-```gradle
-repositories {
-    maven { url 'https://maven.pkg.github.com/abdulraheemnohri/NanoAI-Runtime-SDK' }
-}
+### C++ Core API
+```cpp
+#include "nanoai/runtime.h"
 
-dependencies {
-    implementation 'org.nanoai:nanoai-android:1.0.0'
-}
+nanoai::NanoRuntime nrx;
+nrx.loadModel("llama-3.gguf", "chat");
+std::string res = nrx.generate("Hello", "chat");
 ```
 
-### Java Integration (Desktop)
-```gradle
-dependencies {
-    implementation 'org.nanoai:nanoai-java:1.0.0'
-}
-```
+### Resource Governance
+- **ThermalGovernor**: Monitors system temperature and throttles workload to prevent overheating.
+- **BatteryGovernor**: Adjusts execution priority and backend selection based on power levels.
 
-### Python Integration
-```bash
-pip install nanoai
-# Ensure libnanoai.so is in your LD_LIBRARY_PATH
-```
+### Cluster Mesh
+- **Discovery**: Auto-detects LAN nodes using UDP/mDNS.
+- **StateSync**: Synchronizes session context across multiple devices.
+- **Replication**: Distributes model weights to edge nodes for local execution.
 
-### Rust Integration
-```toml
-[dependencies]
-nanoai = "1.0"
-```
+## 📦 Supported Model Formats
+- GGUF (Llama, Gemma, etc.)
+- ONNX (Vision, NLP)
+- TensorFlow Lite (Edge detection)
+- CoreML (Apple Silicon optimized)
+- OpenVINO IR (Intel optimized)
 
----
-
-## 2. Usage Examples
-
-### Android / Kotlin Example
-```kotlin
-val runtime = NanoRuntime()
-
-runtime.loadModel(
-    "gemma-3n.gguf"
-)
-
-val result = runtime.generate(
-    "Explain AI"
-)
-
-println(result)
-```
-
-### Python Example
-```python
-from nanoai import NanoRuntime
-
-rt = NanoRuntime()
-rt.load_model("gemma.gguf")
-print(rt.generate("Hello"))
-```
-
-### Rust Example
-```rust
-use nanoai::NanoRuntime;
-
-fn main() {
-    let runtime = NanoRuntime::new();
-    runtime.load_model("gemma.gguf", "default");
-    let res = runtime.generate("Hi", "default");
-    println!("{}", res);
-}
-```
-
-### Java Example
-```java
-NanoRuntime rt = new NanoRuntime();
-rt.loadModel("gemma.gguf");
-System.out.println(rt.generate("Hello"));
-```
-
----
-
-## 3. Benefits of NanoAI
-
-- **Offline-First**: Run powerful AI models without any internet connection.
-- **Privacy-Focused**: User data hamesha device par rehta hai.
-- **Cross-Platform**: Unified API for mobile, desktop, and embedded.
-- **Hardware Acceleration**: Automatically choose GPU or NPU based on device capability.
-- **Memory Optimized**: Features model caching, memory mapping (mmap), and lazy loading.
-- **Multi-Modal**: Native support for Text, Vision, and Audio AI tasks.
-
----
-
-## 4. Multi-Model Parallel Execution
-NanoAI allows running multiple models in parallel by addressing them with a `modelId`.
-```kotlin
-runtime.loadModel("chat.gguf", "chat_model")
-runtime.loadModel("ocr.onnx", "vision_model")
-
-val chatRes = runtime.generate("Hi", "chat_model")
-val ocrRes = runtime.runOCR(imageBuffer, 1920, 1080) // default routing or specific ID
-```
-
----
-
-## 5. Model Conversion & Quantization
-Optimize models for edge devices using the built-in converter.
-- **Auto Quantization**: FP32 → FP16, INT8, or INT4.
-- **Smaller Footprint**: Reduce model size by up to 8x.
-- **Faster Inference**: Significant speedups on mobile NPUs.
+## 🛠 Multi-Language SDKs
+- **Python**: `pip install nanoai-runtime-x`
+- **Node.js**: `npm install nanoai-runtime-x`
+- **Rust**: `cargo add nanoai-runtime-x`
+- **Java/Android**: Native JNI bridge support.
+- **Go/Kotlin/RN/Flutter**: Foundational support in v2.5.

@@ -1,11 +1,13 @@
 build/
-target/
+bin/
+obj/
+dist/
+node_modules/
 __pycache__/
 *.so
-*.so.*
 *.dylib
 *.dll
 *.o
 *.a
-bin/
-lib/
+target/
+.DS_Store
