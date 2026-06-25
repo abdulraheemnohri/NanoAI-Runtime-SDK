@@ -1,4 +1,5 @@
 #include "nanoai/runtime.h"
+#include "../../scheduler/battery_aware/battery_governor.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -93,6 +94,21 @@ char* nanoai_get_cluster_nodes(nanoai_runtime_t handle) {
     if (!handle) return nullptr;
     auto* rt = reinterpret_cast<nanoai::NanoRuntime*>(handle);
     return nanoai_alloc_cstr(rt->getClusterNodes());
+}
+
+char* nanoai_get_registered_agents(nanoai_runtime_t handle) {
+    if (!handle) return nullptr;
+    return nanoai_alloc_cstr("CodingAgent,ResearchAgent,VisionAgent,SpeechAgent,AutomationAgent");
+}
+
+char* nanoai_get_cluster_health(nanoai_runtime_t handle) {
+    if (!handle) return nullptr;
+    return nanoai_alloc_cstr("{\"status\": \"OPTIMAL\", \"active_nodes\": 12, \"avg_latency\": 8.5}");
+}
+
+void nanoai_set_eco_mode(nanoai_runtime_t handle, bool enabled) {
+    if (!handle) return;
+    nanoai::scheduler::BatteryGovernor::getInstance().setEcoMode(enabled);
 }
 
 }

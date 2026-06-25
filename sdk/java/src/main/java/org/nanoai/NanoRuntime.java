@@ -9,7 +9,6 @@ public class NanoRuntime implements AutoCloseable, Closeable {
         try {
             System.loadLibrary("nanoai");
         } catch (UnsatisfiedLinkError e) {
-            // Development fallback
             String libPath = System.getProperty("user.dir") + "/../../build/libnanoai.so";
             try {
                 System.load(libPath);
@@ -67,6 +66,19 @@ public class NanoRuntime implements AutoCloseable, Closeable {
         return nativeGetClusterNodes(handle);
     }
 
+    public String[] getRegisteredAgents() {
+        String res = nativeGetRegisteredAgents(handle);
+        return res != null ? res.split(",") : new String[0];
+    }
+
+    public String getClusterHealth() {
+        return nativeGetClusterHealth(handle);
+    }
+
+    public void setEcoMode(boolean enabled) {
+        nativeSetEcoMode(handle, enabled);
+    }
+
     private native long nativeInit();
     private native void nativeDestroy(long handle);
     private native boolean nativeLoadModel(long handle, String modelPath, String modelId);
@@ -78,4 +90,8 @@ public class NanoRuntime implements AutoCloseable, Closeable {
     private native String nativeGetTelemetry(long handle);
     private native String nativeGetHardwareProfile(long handle);
     private native String nativeGetClusterNodes(long handle);
+
+    private native String nativeGetRegisteredAgents(long handle);
+    private native String nativeGetClusterHealth(long handle);
+    private native void nativeSetEcoMode(long handle, boolean enabled);
 }

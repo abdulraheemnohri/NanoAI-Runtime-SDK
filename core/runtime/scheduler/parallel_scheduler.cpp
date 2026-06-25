@@ -51,12 +51,22 @@ static float calculateDeviceScore(const hal::DeviceCapability& cap, float load) 
     float base = cap.performanceScore;
     float availability = 1.0f - load;
 
-    // Incorporate Resource Governance
     float thermalFactor = scheduler::ThermalGovernor::getInstance().getThrottlingFactor();
     bool powerThrottling = scheduler::BatteryGovernor::getInstance().shouldThrottlingForPower();
+    bool ecoMode = scheduler::BatteryGovernor::getInstance().isEcoModeEnabled();
 
     float score = base * availability * thermalFactor;
-    if (powerThrottling) score *= 0.5f; // Aggressive power saving
+
+    // NRX Eco-Mode: Favor NPU/DSP over GPU/CPU
+    if (ecoMode) {
+        if (cap.category == hal::DeviceCategory::NPU || cap.category == hal::DeviceCategory::DSP) {
+            score *= 2.0f; // Boost efficient hardware
+        } else if (cap.category == hal::DeviceCategory::GPU || cap.category == hal::DeviceCategory::CPU) {
+            score *= 0.3f; // Heavily penalize power-hungry hardware
+        }
+    } else if (powerThrottling) {
+        score *= 0.5f;
+    }
 
     return score;
 }
@@ -72,19 +82,19 @@ void ParallelScheduler::workerThread() {
             m_taskQueue.pop();
         }
 
-        // NRX Advanced Scheduling Logic (Thermal & Battery Aware)
         auto remoteNodes = cluster::DiscoveryService::getInstance().getDiscoveredNodes();
         bool processed = false;
 
         bool isThermalStressed = scheduler::ThermalGovernor::getInstance().isOverheating();
+        bool ecoMode = scheduler::BatteryGovernor::getInstance().isEcoModeEnabled();
 
-        // 1. Cluster Load Balancing (Prioritize if local thermal/battery stress)
-        if (!remoteNodes.empty() && (task.priority != TaskPriority::CRITICAL || isThermalStressed)) {
+        // 1. Cluster Load Balancing (Prioritize if local stress or Eco-Mode)
+        if (!remoteNodes.empty() && (task.priority != TaskPriority::CRITICAL || isThermalStressed || ecoMode)) {
             auto it = std::min_element(remoteNodes.begin(), remoteNodes.end(),
                 [](const auto& a, const auto& b) { return a.currentLoad < b.currentLoad; });
 
-            if (it->currentLoad < 0.4f) {
-                std::cout << "Scheduler: [Cluster-Offload] Reason: " << (isThermalStressed ? "Thermal" : "Load") << " | Target: " << it->id << std::endl;
+            if (it->currentLoad < 0.5f) {
+                std::cout << "Scheduler: [NRX-ECO-OFFLOAD] Target: " << it->id << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(150));
                 processed = true;
             }
@@ -109,8 +119,8 @@ void ParallelScheduler::workerThread() {
             }
 
             if (bestDevice) {
-                std::cout << "Scheduler: [Local-Gov] Task " << task.taskId << " -> " << bestDevice->getCapability().name
-                          << " (Adj-Score: " << bestScore << ")" << std::endl;
+                std::cout << "Scheduler: [NRX-EXEC] Task " << task.taskId << " -> " << bestDevice->getCapability().name
+                          << " (NRX-Score: " << bestScore << ")" << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(300));
             }
         }

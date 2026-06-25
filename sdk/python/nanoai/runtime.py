@@ -47,6 +47,16 @@ class NanoRuntime:
         self.lib.nanoai_get_cluster_nodes.argtypes = [ctypes.c_void_p]
         self.lib.nanoai_get_cluster_nodes.restype = ctypes.c_void_p
 
+        # NRX Refinements
+        self.lib.nanoai_get_registered_agents.argtypes = [ctypes.c_void_p]
+        self.lib.nanoai_get_registered_agents.restype = ctypes.c_void_p
+
+        self.lib.nanoai_get_cluster_health.argtypes = [ctypes.c_void_p]
+        self.lib.nanoai_get_cluster_health.restype = ctypes.c_void_p
+
+        self.lib.nanoai_set_eco_mode.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        self.lib.nanoai_set_eco_mode.restype = None
+
         self.handle = self.lib.nanoai_create()
 
     def _decode_and_free(self, ptr):
@@ -98,3 +108,15 @@ class NanoRuntime:
     def get_cluster_nodes(self):
         ptr = self.lib.nanoai_get_cluster_nodes(self.handle)
         return self._decode_and_free(ptr)
+
+    def get_registered_agents(self):
+        ptr = self.lib.nanoai_get_registered_agents(self.handle)
+        s = self._decode_and_free(ptr)
+        return s.split(",") if s else []
+
+    def get_cluster_health(self):
+        ptr = self.lib.nanoai_get_cluster_health(self.handle)
+        return json.loads(self._decode_and_free(ptr))
+
+    def set_eco_mode(self, enabled):
+        self.lib.nanoai_set_eco_mode(self.handle, enabled)
