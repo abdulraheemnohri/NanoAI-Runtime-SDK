@@ -1,8 +1,6 @@
 #include "cluster_manager.h"
 #include "../discovery/discovery.h"
-#include "../synchronization/state_sync.h"
 #include <sstream>
-#include <iostream>
 
 namespace nanoai {
 namespace cluster {
@@ -23,11 +21,6 @@ std::string ClusterManager::getNodes() {
     }
     ss << "]";
     return ss.str();
-}
-
-void ClusterManager::sync() {
-    std::cout << "ClusterManager: Manual synchronization triggered." << std::endl;
-    StateSync::getInstance().syncGlobalState();
 }
 
 } // namespace cluster

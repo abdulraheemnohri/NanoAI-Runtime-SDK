@@ -23,7 +23,7 @@ Java_org_nanoai_NanoRuntime_nativeLoadModel(JNIEnv* env, jobject thiz, jlong han
     bool success = runtime->loadModel(path, id);
     env->ReleaseStringUTFChars(model_path, path);
     env->ReleaseStringUTFChars(model_id, id);
-    return static_cast<jboolean>(success);
+    return (jboolean)success;
 }
 
 JNIEXPORT jstring JNICALL
@@ -42,16 +42,14 @@ Java_org_nanoai_NanoRuntime_nativeRunSwarm(JNIEnv* env, jobject thiz, jlong hand
     auto* runtime = reinterpret_cast<nanoai::NanoRuntime*>(handle);
     const char* t_name = env->GetStringUTFChars(task_name, nullptr);
     const char* in = env->GetStringUTFChars(input, nullptr);
-
     int count = env->GetArrayLength(agents);
     std::vector<std::string> agentList;
     for(int i=0; i<count; ++i) {
         jstring agent = (jstring)env->GetObjectArrayElement(agents, i);
-        const char* agentStr = env->GetStringUTFChars(agent, nullptr);
-        agentList.push_back(agentStr);
-        env->ReleaseStringUTFChars(agent, agentStr);
+        const char* s = env->GetStringUTFChars(agent, nullptr);
+        agentList.push_back(s);
+        env->ReleaseStringUTFChars(agent, s);
     }
-
     std::string result = runtime->runSwarm(t_name, agentList, in);
     env->ReleaseStringUTFChars(task_name, t_name);
     env->ReleaseStringUTFChars(input, in);
@@ -71,7 +69,7 @@ Java_org_nanoai_NanoRuntime_nativeRunWorkflow(JNIEnv* env, jobject thiz, jlong h
 
 JNIEXPORT jboolean JNICALL
 Java_org_nanoai_NanoRuntime_nativeBootOS(JNIEnv* env, jobject thiz, jlong handle) {
-    return static_cast<jboolean>(reinterpret_cast<nanoai::NanoRuntime*>(handle)->bootOS());
+    return (jboolean)reinterpret_cast<nanoai::NanoRuntime*>(handle)->bootOS();
 }
 
 JNIEXPORT jstring JNICALL
@@ -96,6 +94,21 @@ Java_org_nanoai_NanoRuntime_nativeGetHardwareProfile(JNIEnv* env, jobject thiz, 
 JNIEXPORT jstring JNICALL
 Java_org_nanoai_NanoRuntime_nativeGetClusterNodes(JNIEnv* env, jobject thiz, jlong handle) {
     return env->NewStringUTF(reinterpret_cast<nanoai::NanoRuntime*>(handle)->getClusterNodes().c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeGetRegisteredAgents(JNIEnv* env, jobject thiz, jlong handle) {
+    return env->NewStringUTF(nanoai_get_registered_agents(reinterpret_cast<nanoai_runtime_t>(handle)));
+}
+
+JNIEXPORT jstring JNICALL
+Java_org_nanoai_NanoRuntime_nativeGetClusterHealth(JNIEnv* env, jobject thiz, jlong handle) {
+    return env->NewStringUTF(nanoai_get_cluster_health(reinterpret_cast<nanoai_runtime_t>(handle)));
+}
+
+JNIEXPORT void JNICALL
+Java_org_nanoai_NanoRuntime_nativeSetEcoMode(JNIEnv* env, jobject thiz, jlong handle, jboolean enabled) {
+    nanoai_set_eco_mode(reinterpret_cast<nanoai_runtime_t>(handle), (bool)enabled);
 }
 
 }

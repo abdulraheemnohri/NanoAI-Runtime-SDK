@@ -6,17 +6,11 @@ namespace scheduler {
 
 class ThermalGovernor {
 public:
-    static ThermalGovernor& getInstance();
-
-    float getThrottlingFactor();
-    float getCurrentTemperature();
-    bool isOverheating();
-
-private:
-    ThermalGovernor() = default;
+    static float getThrottlingFactor() {
+        // Simulated: 1.0 = full speed, 0.5 = throttled
+        return 0.95f;
+    }
 };
 
-} // namespace scheduler
-} // namespace nanoai
-
-#endif // NANOAI_THERMAL_GOVERNOR_H
+} }
+#endif
